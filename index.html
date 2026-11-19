@@ -1471,7 +1471,7 @@ const NET = {
   url(b){ return this.override() || this.BROKERS[b] || this.BROKERS[0]; },
   uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,6); },
   t(sub){ return `${this.PREFIX}/${this.room}/${sub}`; },
-  connect(room, b, timeout=7000){
+  connect(room, b, timeout=15000){
     this.disconnect();
     this.room = room; this.b = b;
     return new Promise(res => {
@@ -1503,7 +1503,7 @@ const NET = {
   },
   async connectAny(room){
     if (this.override()) return (await this.connect(room, 0)) ? 0 : -1;
-    for (let b = 0; b < this.BROKERS.length; b++) if (await this.connect(room, b, 6000)) return b;
+    for (let b = 0; b < this.BROKERS.length; b++) if (await this.connect(room, b, 12000)) return b;
     this.disconnect(); return -1;
   },
   pub(sub, obj, retain=false){
@@ -1551,7 +1551,7 @@ Object.assign(App.prototype, {
   /* =================== MÓVIL PRINCIPAL =================== */
   async netHost(){
     const g=this.game;
-    ui._open('<p style="text-align:center">📡 Creando la sala…</p>');
+    ui._open('<p style="text-align:center">📡 Creando la sala… (puede tardar unos segundos)</p>');
     const room = newRoom();
     this.netBind();
     const b = await NET.connectAny(room);
@@ -1714,8 +1714,8 @@ Object.assign(App.prototype, {
     NET.onMsg = (sub, data) => this.netPlayerMsg(sub, data);
     NET.onStatus = () => this.renderMe();
     const ok = await NET.connect(room, b);
-    if (!ok) $('join-sub').innerHTML = 'No consigo conectar 😕. Revisa que tengas internet; sigo intentándolo…';
-    setTimeout(()=>{ if (!this.pv.setup) $('join-sub').innerHTML = `No encuentro la partida <b>${esc(room)}</b>. ¿Seguro que el enlace es el último que ha mandado quien lleva el juego?`; }, 9000);
+    if (!ok && !this.pv.setup) $('join-sub').innerHTML = 'Está tardando en conectar 😕. Revisa que tengas internet; sigo intentándolo…';
+    setTimeout(()=>{ if (!this.pv.setup && NET.connected) $('join-sub').innerHTML = `No encuentro la partida <b>${esc(room)}</b>. ¿Seguro que el enlace es el último que ha mandado quien lleva el juego?`; }, 25000);
   },
   pvKey(){ return 'anomalia_me_'+this.pv.room; },
   netPlayerMsg(sub, data){
@@ -1764,7 +1764,8 @@ Object.assign(App.prototype, {
     });
   },
   choose(p){
-    const pv=this.pv; pv.me=p; store.set(this.pvKey(), p);
+    const pv=this.pv; if (!pv.setup) return;
+    pv.me=p; store.set(this.pvKey(), p);
     pv.joined[p]=true;
     this.pvPush();
     document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
