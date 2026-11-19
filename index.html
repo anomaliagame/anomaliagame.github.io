@@ -353,7 +353,7 @@ const CONFIG = {
   PEN_KILL: 2,                // víctima del guiño del asesino
   PEN_KILLER_CAUGHT: 8,       // cazan al Asesino de verdad
   PEN_DOUBLE_FAIL: 6,
-  TESTIFY_SECONDS: 10,        // tiempo máximo para que testifique una víctima         // doble guiño: la víctima señala mal (sus 2 + 4 de multa)
+  TESTIFY_SECONDS: 20,        // ventana (en segundo plano) para que testifique una víctima         // doble guiño: la víctima señala mal (sus 2 + 4 de multa)
   REWARD_MISSION: 3,          // castigos que repartes por misión cumplida
   STORAGE_KEY: 'anomalia_v2'
 };
@@ -1519,9 +1519,9 @@ function evtText(e){
   if (e.type==='acc') return e.hit ? `🚨 <b>${esc(e.from)}</b> ha pillado a <b>${esc(e.to)}</b> haciendo una misión: <b>${esc(e.to)}</b> bebe ${CONFIG.PEN_CAUGHT}.`
                                    : `🤡 <b>${esc(e.from)}</b> acusó a <b>${esc(e.to)}</b> en falso: <b>${esc(e.from)}</b> bebe ${CONFIG.PEN_FALSE_ACCUSE}.`;
   if (e.type==='killer') return `🔪 ¡ASESINO CAZADO! <b>${esc(e.who)}</b> era el Asesino y bebe ${CONFIG.PEN_KILLER_CAUGHT}.${e.other?` <b>${esc(e.other)}</b> era un impostor: se acaba la bebida.`:''} Puede seguir matando… con cuidado 😏`;
-  if (e.type==='impostor') return `🎭 ¡ASESINO FALSO! <b>${esc(e.who)}</b> guiñaba haciéndose pasar por el Asesino: se acaba la bebida.`;
-  if (e.type==='policeMiss') return `🤦 <b>${esc(e.by)}</b> (el Policía) acusó a <b>${esc(e.who)}</b>, que no había hecho nada: <b>${esc(e.by)}</b> bebe ${CONFIG.PEN_POLICE_FAIL}.`;
-  if (e.type==='testify') return `👮 <b>${esc(e.cop)}</b> (el Policía) acusa a <b>${esc(e.sus)}</b> de guiñar. ¿Alguna víctima lo confirma?`;
+  if (e.type==='impostor') return `🎭 ¡ASESINO FALSO! ${e.witness?`<b>${esc(e.witness)}</b> confirma que le guiñó: `:''}<b>${esc(e.who)}</b> se hacía pasar por el Asesino y se acaba la bebida.`;
+  if (e.type==='policeMiss') return `🤦 Nadie ha confirmado que <b>${esc(e.who)}</b> guiñara. <b>${esc(e.by)}</b> (el Policía) bebe ${CONFIG.PEN_POLICE_FAIL}.`;
+  if (e.type==='testify') return `👮 <b>${esc(e.cop)}</b> (el Policía) acusa a <b>${esc(e.sus)}</b> de guiñar. Si te guiñó a ti, testifica desde tu móvil.`;
   if (e.type==='testimony') return '';
   if (e.type==='fakeCop') return `🕵️ <b>${esc(e.by)}</b> se hizo pasar por el Policía: bebe ${CONFIG.PEN_POLICE_FAIL}.`;
   if (e.type==='doubleFail') return `💀 <b>${esc(e.vic)}</b> falló con el doble guiño (<b>${esc(e.pick)}</b> no es el Asesino): bebe ${CONFIG.PEN_DOUBLE_FAIL}.`;
@@ -1874,37 +1874,31 @@ Object.assign(App.prototype, {
     const joined = onHost ? this.game.online.joined : this.pv.joined;
     const players = onHost ? this.game.players : this.pv.setup.players;
     const witnesses = players.filter(p=>p!==cop && p!==sus && joined[p]);
+    if (this._testify && !this._testify.done) clearTimeout(this._testify.timer);
     this._testify={ id, cop, sus, done:false, onHost, witnesses, noes:[] };
     if (onHost) this.game.online.seen.push(id); else this.pv.seen.push(id);
     NET.pub('evt', { type:'testify', id, cop, sus, origin:NET.cid });
-    let left=CONFIG.TESTIFY_SECONDS;
-    if (!witnesses.length && !onHost){ this._testify.timer=null; return this.resolveTestify(false); }
-    const draw=()=>{
-      if (!this._testify || this._testify.id!==id || this._testify.done) return;
-      $('overlay-inner').innerHTML = `<div style="text-align:center" class="stack"><div style="font-size:3rem">🤨</div>
-        <h2>${esc(sus)} NO es el Asesino…</h2>
-        <p>¿Era un impostor? Esperando a que la víctima testifique desde su móvil (${this._testify.noes.length}/${witnesses.length} han dicho que no).</p>
-        <div class="code">${left}s</div>
-        ${onHost?`<button class="btn" id="t-yes">🗣️ La víctima no tiene móvil y lo confirma</button>`:''}</div>`;
-      $('overlay').classList.add('active');
-      if (onHost) $('t-yes').onclick=()=>this.resolveTestify(true,'un testigo');
-    };
-    draw();
-    this._testify.redraw=draw;
-    this._testify.timer=setInterval(()=>{ left--; if (left<=0) return this.resolveTestify(false); draw(); },1000);
+    // sin cuenta atrás en pantalla: la ventana para testificar corre en segundo plano
+    this._testify.timer=setTimeout(()=>this.resolveTestify(false), CONFIG.TESTIFY_SECONDS*1000);
+    $('overlay-inner').innerHTML = `<div style="text-align:center" class="stack"><div style="font-size:3rem">👮</div>
+      <h2>${esc(sus)}, acusado</h2>
+      <p><b>${esc(sus)}</b> no es el Asesino. Si ha guiñado a alguien, la víctima puede testificarlo desde su móvil. Seguid jugando: si alguien lo confirma, os saltará el aviso.</p>
+      ${onHost?`<button class="btn" id="t-yes">🗣️ La víctima no tiene móvil y lo confirma</button>`:''}
+      <button class="btn btn-primary" onclick="app.closeOverlay()">Seguir jugando</button></div>`;
+    $('overlay').classList.add('active');
+    if (onHost) $('t-yes').onclick=()=>{ this.resolveTestify(true,'un testigo'); this.closeOverlay(); };
   },
   resolveTestify(yes, by){
     const t=this._testify; if (!t || t.done) return;
-    t.done=true; clearInterval(t.timer); this._testify=null;
+    t.done=true; clearTimeout(t.timer); this._testify=null;
     const e = yes ? { type:'impostor', who:t.sus, by:t.cop, witness:by, ref:t.id } : { type:'policeMiss', who:t.sus, by:t.cop, ref:t.id };
-    const icon = yes?'🎭':'🤦', title = yes?'¡ASESINO FALSO!':'¡NADIE LO CONFIRMA!';
-    const body = yes ? `<p><b>${esc(by)}</b> confirma que <b>${esc(t.sus)}</b> le guiñó. Era un impostor: <b style="color:#fca5a5">se acaba la bebida</b>.</p>`
-                     : `<p>Ninguna víctima ha testificado contra <b>${esc(t.sus)}</b>. <b>${esc(t.cop)}</b> (el Policía) bebe <b style="color:#fca5a5">${CONFIG.PEN_POLICE_FAIL} castigos</b> 👀</p>`;
+    e.id=NET.uid(); e.origin=NET.cid;
     if (t.onHost){
       const g=this.game; yes ? g.stats.impostors=(g.stats.impostors||0)+1 : g.stats.policeMisses++;
-      e.id=NET.uid(); e.origin=NET.cid; g.online.seen.push(e.id); NET.pub('evt', e);
-      this.resultOverlay(icon, title, body, true);
-    } else this.pvEvent(e, icon, title, body);
+      g.online.seen.push(e.id); this.save();
+    } else this.pv.seen.push(e.id);
+    NET.pub('evt', e);
+    this.toast(evtText(e), 9000);
   },
   witnessPrompt(d, me){
     if (!me || me===d.cop || me===d.sus) return;
@@ -1931,7 +1925,7 @@ Object.assign(App.prototype, {
           // todos los testigos conectados han dicho que no: no hace falta esperar
           if (t.witnesses.every(w=>t.noes.includes(w)) && !t.onHost) this.resolveTestify(false);
           else if (t.witnesses.every(w=>t.noes.includes(w)) && t.onHost) this.resolveTestify(false);
-          else t.redraw && t.redraw();
+
         }
       }
       return true;
