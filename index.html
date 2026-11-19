@@ -189,6 +189,7 @@ h1,h2,h3{font-weight:800;letter-spacing:-.02em}
     <span class="title-grad">ANOMALÍA <span id="act-net"></span></span>
     <div class="row">
       <button class="btn btn-icon" onclick="app.openRules()" aria-label="Reglas">📜</button>
+      <button class="btn btn-icon btn-purple" id="btn-me" style="display:none" onclick="app.openMe()" aria-label="Mi rol y misiones">🙋</button>
       <button class="btn btn-icon" onclick="app.nav('feedback')" aria-label="Feedback">📊</button>
       <button class="btn btn-icon" onclick="app.nav('settings')" aria-label="Ajustes">⚙️</button>
     </div>
@@ -973,6 +974,7 @@ class App {
     $('mystery-actions').style.display = Object.keys(g.missions).length ? 'grid' : 'none';
     const online = !!g.online;
     $('act-1').innerHTML = online ? '<span>📱</span>Jugadores' : '<span>🔒</span>Mis misiones';
+    $('btn-me').style.display = online && g.online.me ? '' : 'none';
     $('act-net').innerHTML = online ? `<span class="dot ${NET.connected?'on':'off'}"></span>` : '';
   }
 
@@ -1218,7 +1220,8 @@ class App {
     this.save();
     if (g.online){
       this.netPushState(accused);
-      const id=NET.uid(); g.online.seen.push(id);
+      const id=this._accId || NET.uid(); g.online.seen.push(id);
+      if (this._accId){ NET.pub(`acc/${g.players.indexOf(accused)}`, null, true); this._accId=null; }
       NET.pub('evt', { type:'acc', id, from:accuser, to:accused, hit:idx>=0, origin:NET.cid });
     }
     $('overlay-inner').innerHTML = `<div style="text-align:center" class="stack">${html}<button class="btn btn-primary" onclick="app.closeOverlay()">Seguir jugando</button></div>`;
@@ -1584,6 +1587,15 @@ Object.assign(App.prototype, {
       if (this.screen==='lobby') this.renderLobby();
       if (this._lobbyOpen) this.renderLobbyOverlay();
       if (this._viewing===p && $('overlay').classList.contains('active') && this._viewMode==='missions') this.showMyMissions(p);
+    } else if (sub.startsWith('acc/')){
+      const p=g.players[+sub.split('/')[1]];
+      if (!o.me || p!==o.me) return;
+      if (data && data.id && data.origin!==NET.cid){
+        this._accId=data.id;
+        this.accusedAnswer(data.from, o.me);
+        $('overlay').classList.add('active');
+        try{ navigator.vibrate && navigator.vibrate([200,100,200]); }catch(e){}
+      }
     } else if (sub==='evt' && data){
       if (o.seen.includes(data.id)) return; o.seen.push(data.id); if (o.seen.length>200) o.seen.shift();
       if (data.origin===NET.cid) return;
@@ -1602,18 +1614,21 @@ Object.assign(App.prototype, {
     const g=this.game; if (!g || !g.online) return;
     const o=g.online; const i=g.players.indexOf(p);
     o.n[p]=(o.n[p]||0)+1;
-    NET.pub(`state/${i}`, { n:o.n[p], statuses:g.missions[p].map(m=>m.status), joined:!!o.joined[p], by:'host' }, true);
+    NET.pub(`state/${i}`, { n:o.n[p], statuses:g.missions[p].map(m=>m.status), joined:!!o.joined[p], host:p===o.me, by:'host' }, true);
   },
   lobbyHTML(){
     const g=this.game, o=g.online, url=this.joinUrl();
     const rows = g.players.map((p,i)=>`<div class="status-row"><span>${o.joined[p]?'🟢':'⚪'} <b>${esc(p)}</b></span>
-      ${o.joined[p]?'<span class="small muted">en su móvil</span>':`<button class="btn btn-sm btn-purple" onclick="app.viewHere(${i})">🔒 Ver aquí</button>`}</div>`).join('');
+      ${p===o.me?'<span class="small" style="color:var(--purple)">📱 este móvil (tú)</span>':o.joined[p]?'<span class="small muted">en su móvil</span>':`<button class="btn btn-sm btn-purple" onclick="app.viewHere(${i})">🔒 Ver aquí</button>`}</div>`).join('');
     return `<div class="panel stack" style="text-align:center">
         <p class="small muted">Que cada uno escanee el QR o abra el enlace y elija su nombre</p>
         <div class="qr">${this.qrHTML(url)}</div>
         <div class="code">${o.room}</div>
         <button class="btn btn-sm" onclick="app.copyLink()">📋 Copiar enlace para WhatsApp</button>
       </div>
+      <div class="setting-title">¿Quién eres tú? (el que lleva este móvil)</div>
+      <div class="row" style="flex-wrap:wrap">${g.players.map((p,i)=>`<button class="btn btn-sm ${p===o.me?'btn-purple':''}" onclick="app.setMe(${i})">${esc(p)}</button>`).join('')}</div>
+      ${o.me?`<p class="tiny muted">Tus misiones y tu rol, en el botón 🙋 de arriba durante la partida.</p>`:''}
       <div class="setting-title">Jugadores</div>${rows}
       <p class="tiny muted">¿Alguien sin móvil o sin batería? Pulsa «Ver aquí» y que mire sus misiones en este móvil.</p>`;
   },
@@ -1621,6 +1636,24 @@ Object.assign(App.prototype, {
     if (!this.game || !this.game.online) return;
     $('lobby-net').innerHTML = `<span class="dot ${NET.connected?'on':'off'}"></span>${NET.connected?'Conectado':'Sin conexión'}`;
     $('lobby-content').innerHTML = this.lobbyHTML();
+  },
+  async setMe(i){
+    const g=this.game, o=g.online, p=g.players[i];
+    if (o.me===p) return;
+    if (o.joined[p] && !(await ui.confirm(`<b>${esc(p)}</b> ya está conectado desde otro móvil. ¿Seguro que eres tú?`,'Soy yo'))) return;
+    if (o.me){ const old=o.me; o.me=null; o.joined[old]=false; this.netPushState(old); }
+    o.me=p; o.joined[p]=true; this.netPushState(p); this.save();
+    if (this.screen==='lobby') this.renderLobby(); if (this._lobbyOpen) this.renderLobbyOverlay();
+  },
+  openMe(){
+    const me=this.game?.online?.me; if (!me) return;
+    this._viewMode='missions'; this._viewing=me;
+    $('overlay-inner').innerHTML = `<div style="text-align:center" class="stack"><h2>🙋 ${esc(me)}</h2>
+      <p class="muted small">Que nadie más mire la pantalla 👀</p>
+      <button class="btn btn-purple" id="me-ok">👁️ Ver mi rol y mis misiones</button>
+      <button class="btn btn-danger" onclick="app.closeOverlay()">Cancelar</button></div>`;
+    $('me-ok').onclick=()=>{ this._viewMode='missions'; this.showMyMissions(me); };
+    $('overlay').classList.add('active');
   },
   lobbyStart(){ this.nav('game'); if (this.game.current) this.renderGame(); else this.nextCard(); },
   openLobbyOverlay(){ this._lobbyOpen=true; this.renderLobbyOverlay(); $('overlay').classList.add('active'); },
@@ -1641,6 +1674,7 @@ Object.assign(App.prototype, {
   /* acusación lanzada desde el móvil principal */
   netAccuse(accuser, accused){
     const g=this.game, o=g.online, id=NET.uid();
+    if (accused===o.me) return this.accusedAnswer(accuser, accused);
     if (!o.joined[accused] || !NET.connected){
       return this.gateOverlay(accused, `<b>${esc(accuser)}</b> dice que lo que acabas de hacer era una misión secreta. Sé honrado 😇`, ()=>this.accusedAnswer(accuser, accused));
     }
@@ -1690,6 +1724,7 @@ Object.assign(App.prototype, {
       if (!pv.setup || !data) return;
       const p=pv.setup.players[+sub.split('/')[1]]; if (!p) return;
       if (data.joined) pv.joined[p]=true;
+      if (data.host) pv.hostP=p; else if (pv.hostP===p && data.by==='host') pv.hostP=null;
       if ((data.n||0) > (pv.n[p]||0)){ pv.n[p]=data.n; pv.statuses[p]=data.statuses; }
       if (!pv.me) this.renderJoin(); else if (p===pv.me) this.renderMe();
     } else if (sub.startsWith('acc/')){
@@ -1712,7 +1747,7 @@ Object.assign(App.prototype, {
     const pv=this.pv; if (!pv.setup) return;
     $('join-sub').innerHTML = `Partida <b>${esc(pv.room)}</b>. ¿Quién eres?`;
     $('join-list').innerHTML = pv.setup.players.map((p,i)=>`<button class="btn btn-block" style="padding:16px;justify-content:space-between" data-i="${i}">
-      <span>${esc(p)}</span><span class="small muted">${pv.joined[p]?'🟢 ya conectado':''}</span></button>`).join('');
+      <span>${esc(p)}</span><span class="small muted">${pv.hostP===p?'📱 lleva el juego':pv.joined[p]?'🟢 ya conectado':''}</span></button>`).join('');
     $('join-list').querySelectorAll('[data-i]').forEach(b=>b.onclick=async()=>{
       const p=pv.setup.players[+b.dataset.i];
       if (pv.joined[p] && !(await ui.confirm(`Parece que <b>${esc(p)}</b> ya ha entrado desde otro móvil. ¿Eres tú?`,'Sí, soy yo'))) return;
