@@ -405,7 +405,7 @@ const MISSIONS = [
   { id:'m15', text:'Logra que alguien te pida perdón por cualquier tontería.', fail:'Nadie le pidió perdón a {P}. Ni Dios lo hará.' },
   { id:'m16', text:'Consigue que alguien mueva o coloque un objeto de la mesa solo con señas.', fail:'{P} hizo señas toda la noche y nadie movió nada. Un mimo en paro lo habría hecho mejor.' },
   { id:'m18', text:'Consigue que alguien te sirva o te llene el vaso solo con señas.', fail:'Nadie le sirvió a {P}. Morirá de sed… y solo.' },
-  { id:'m19', dynamic:'cult', text:'Cuela en la conversación estas 5 palabras a lo largo de la partida: {W}.', fail:'{P} no coló sus palabras cultas. La RAE ha presentado una denuncia.' },
+  { id:'m19', dynamic:'cult', text:'Cuela en la conversación estas 3 palabras a lo largo de la partida: {W}.', fail:'{P} no coló sus palabras cultas. La RAE ha presentado una denuncia.' },
   { id:'m20', dynamic:'trap', text:'Consigue que al menos dos personas distintas digan estas palabras: {W}.', fail:'{P} no hizo decir ni una palabra trampa. Manipulador de cuarta división.' },
   { id:'m21', text:'Esconde el vaso de alguien mientras está despistado, de forma que tenga que buscarlo.', fail:'{P} no consiguió esconder ni un vaso. Esconder cadáveres, mejor ni intentarlo.' },
   { id:'m22', text:'Mete un objeto raro (un tapón, una cuchara, una servilleta…) en el bolsillo o la capucha de alguien sin que lo note.', fail:'{P} no metió nada en ningún bolsillo. Como carterista, ni de becario.' },
@@ -768,7 +768,7 @@ class App {
   }
   buildMission(m){
     let text = m.text;
-    if (m.dynamic==='cult') text = text.replace('{W}', shuffle(CULT_WORDS).slice(0,5).join(', '));
+    if (m.dynamic==='cult') text = text.replace('{W}', shuffle(CULT_WORDS).slice(0,3).join(', '));
     if (m.dynamic==='trap') text = text.replace('{W}', shuffle(TRAP_WORDS).slice(0,2).join(' y '));
     return { id:m.id, text, fail:m.fail, status:'pending' };
   }
@@ -798,8 +798,8 @@ class App {
   roleHTML(p){
     const r = this.game.roles;
     if (p===r.killer) return `<div class="role-box">🔪 <b>ERES EL ASESINO</b><br>Guiña el ojo a alguien sin que te vea el Policía. Tu víctima espera unos segundos, dice «¡me han matado!» (sin decir quién) y bebe ${CONFIG.PEN_KILL}. Cada vez que te cacen (el Policía o una víctima con doble guiño), bebes ${CONFIG.PEN_KILLER_CAUGHT}, pero puedes seguir matando.</div>`;
-    if (p===r.police) return `<div class="role-box">👮 <b>ERES EL POLICÍA</b><br>Si ves al Asesino guiñar un ojo, grita «¡ALTO!» y pulsa el botón de ¡Alto! (en tu móvil, o en 🔪 Guiños del móvil principal). Si aciertas, bebe ${CONFIG.PEN_KILLER_CAUGHT}. Si pillas a un impostor, se acaba su bebida. Si acusas a un inocente, bebes ${CONFIG.PEN_POLICE_FAIL}.</div>`;
-    return `<div class="role-box">🙂 <b>Sin rol especial</b><br>Ni Asesino ni Policía. Solo tus misiones… y cuidado con los guiños. Si guiñas haciéndote pasar por el Asesino y te pilla el Policía, te acabas la bebida.</div>`;
+    if (p===r.police) return `<div class="role-box">👮 <b>ERES EL POLICÍA</b><br>Si ves al Asesino guiñar un ojo, grita «¡ALTO!» y pulsa 👮 en tu móvil (o 🔪 Guiños en el móvil principal). Si acusas a alguien que no es el Asesino, la víctima tendrá que testificar desde su móvil que le guiñó. Si aciertas, bebe ${CONFIG.PEN_KILLER_CAUGHT}. Si pillas a un impostor, se acaba su bebida. Si acusas a un inocente, bebes ${CONFIG.PEN_POLICE_FAIL}.</div>`;
+    return `<div class="role-box">🙂 <b>Sin rol especial</b><br>Ni Asesino ni Policía. Solo tus misiones… y cuidado con los guiños. No puedes acusar, pero si el Policía acusa a alguien que te guiñó, podrás testificar. Si guiñas haciéndote pasar por el Asesino y te pilla el Policía, te acabas la bebida.</div>`;
   }
   privateHTML(p, interactive){
     const ms = this.game.missions[p] || [];
@@ -1281,7 +1281,8 @@ class App {
           return this.resultOverlay('🔪','¡ASESINO CAZADO!', `<p><b>${esc(sus)}</b> era el Asesino de verdad.</p>
             <p style="font-size:1.2rem"><b>${esc(sus)}</b> bebe <b style="color:#fca5a5">${CONFIG.PEN_KILLER_CAUGHT} castigos</b>. Puede seguir matando… pero cada vez que le cacen, otros ${CONFIG.PEN_KILLER_CAUGHT} 😏</p>`);
         }
-        // no es el Asesino (o ya estaba cazado): ¿guiñaba de verdad? → impostor
+        // no es el Asesino: con móviles conectados, testifica la víctima desde su móvil
+        if (g.online && NET.connected) return this.startTestify(cop, sus, true);
         $('overlay-inner').innerHTML = `<div style="text-align:center" class="stack"><div style="font-size:3rem">🤨</div>
           <h2>${esc(sus)} NO es el Asesino</h2>
           <p>¿Le habéis pillado guiñando el ojo de verdad? Que lo confirme la víctima.</p>
@@ -1329,8 +1330,9 @@ class App {
       <li><b>Policía:</b> si ve un guiño, grita «¡ALTO!» y pulsa <b>🔪 Guiños → Soy el Policía</b>.
         <ul><li>Pilla al Asesino de verdad: el Asesino bebe <b>${CONFIG.PEN_KILLER_CAUGHT}</b>. Puede seguir matando, pero cada vez que le cacen vuelve a beber ${CONFIG.PEN_KILLER_CAUGHT}.</li>
         <li>Pilla a un impostor que guiñaba: el impostor se acaba la bebida.</li>
-        <li>Acusa a alguien que no ha guiñado: el Policía bebe <b>${CONFIG.PEN_POLICE_FAIL}</b> (y queda descubierto).</li>
-        <li>Si alguien que no es el Policía dice serlo, bebe ${CONFIG.PEN_POLICE_FAIL}.</li></ul></li>
+        <li>Si el acusado no es el Asesino, a todos les llega un aviso: <b>«¿Te ha guiñado a ti?»</b>. Si la víctima testifica que sí, el impostor se acaba la bebida.</li>
+        <li>Si nadie testifica en 25 segundos: el Policía bebe <b>${CONFIG.PEN_POLICE_FAIL}</b> (y queda descubierto).</li>
+        <li>Solo el Policía puede acusar. Los demás solo pueden testificar cuando él acusa.</li></ul></li>
       <li><b>🎭 Asesino falso:</b> si alguien guiña haciéndose pasar por el Asesino y le pilla el Policía, <b>se acaba la bebida entera</b>. Hacer trampas sale más caro que ser el Asesino.</li>
       <li>El Policía también puede ser víctima del Asesino.</li></ul>
       <h3>🗳️ Votaciones</h3>
@@ -1518,6 +1520,8 @@ function evtText(e){
   if (e.type==='killer') return `🔪 ¡ASESINO CAZADO! <b>${esc(e.who)}</b> era el Asesino y bebe ${CONFIG.PEN_KILLER_CAUGHT}.${e.other?` <b>${esc(e.other)}</b> era un impostor: se acaba la bebida.`:''} Puede seguir matando… con cuidado 😏`;
   if (e.type==='impostor') return `🎭 ¡ASESINO FALSO! <b>${esc(e.who)}</b> guiñaba haciéndose pasar por el Asesino: se acaba la bebida.`;
   if (e.type==='policeMiss') return `🤦 <b>${esc(e.by)}</b> (el Policía) acusó a <b>${esc(e.who)}</b>, que no había hecho nada: <b>${esc(e.by)}</b> bebe ${CONFIG.PEN_POLICE_FAIL}.`;
+  if (e.type==='testify') return `👮 <b>${esc(e.cop)}</b> (el Policía) acusa a <b>${esc(e.sus)}</b> de guiñar. ¿Alguna víctima lo confirma?`;
+  if (e.type==='testimony') return '';
   if (e.type==='fakeCop') return `🕵️ <b>${esc(e.by)}</b> se hizo pasar por el Policía: bebe ${CONFIG.PEN_POLICE_FAIL}.`;
   if (e.type==='doubleFail') return `💀 <b>${esc(e.vic)}</b> falló con el doble guiño (<b>${esc(e.pick)}</b> no es el Asesino): bebe ${CONFIG.PEN_DOUBLE_FAIL}.`;
   if (e.type==='msg') return `${e.icon||''} <b>${esc(e.title||'')}</b> ${esc(e.text||'')}`;
@@ -1527,6 +1531,7 @@ function evtText(e){
 Object.assign(App.prototype, {
   /* ---------- utilidades comunes ---------- */
   toast(html, ms=6000){
+    if (!html) return;
     const t=document.createElement('div'); t.className='toast'; t.innerHTML=html;
     t.onclick=()=>t.remove(); document.body.appendChild(t);
     try{ navigator.vibrate && navigator.vibrate(150); }catch(e){}
@@ -1599,6 +1604,7 @@ Object.assign(App.prototype, {
     } else if (sub==='evt' && data){
       if (o.seen.includes(data.id)) return; o.seen.push(data.id); if (o.seen.length>200) o.seen.shift();
       if (data.origin===NET.cid) return;
+      if (this.netTestifyMsg(data, o.me)) return;
       // estadísticas en el móvil principal
       if (data.type==='acc'){ g.stats.accusations++; data.hit?g.stats.hits++:g.stats.misses++; }
       if (data.type==='killer'){ g.roles.timesCaught=(g.roles.timesCaught||0)+1; g.roles.killerCaught=true; }
@@ -1738,6 +1744,7 @@ Object.assign(App.prototype, {
       if (pv.seen.includes(data.id)) return; pv.seen.push(data.id);
       if (this._waitAcc && data.type==='acc' && data.id===this._waitAcc){ this._waitAcc=null; return this.accResultOverlay(data); }
       if (data.origin===NET.cid) return;
+      if (this.netTestifyMsg(data, pv.me)) return;
       this.toast(evtText(data));
     } else if (sub==='end'){
       if (data && data.ended){ pv.ended=data; this.renderMe(); }
@@ -1797,7 +1804,7 @@ Object.assign(App.prototype, {
       <div class="actions">
         <button class="btn btn-danger" onclick="app.pvAccuse()"><span>🚨</span>¡Anomalía!</button>
         <button class="btn" onclick="app.pvDouble()"><span>😵</span>Doble guiño</button>
-        <button class="btn" onclick="app.pvPolice()"><span>👮</span>¡Alto!</button>
+        <button class="btn" onclick="app.pvPolice()"><span>👮</span>Policía</button>
       </div>
       <p class="tiny muted" style="text-align:center">Puedes cerrar esta página: al volver a abrir el enlace sigues donde estabas.</p>`;
   },
@@ -1853,21 +1860,65 @@ Object.assign(App.prototype, {
   async pvPolice(){
     const pv=this.pv, r=pv.setup.roles;
     if (r.police!==pv.me){
-      if (!(await ui.confirm(`Este botón es solo para el Policía. Si no lo eres y lo usas, bebes ${CONFIG.PEN_POLICE_FAIL}. ¿Seguir?`,'Seguir'))) return;
-      return this.pvEvent({ type:'fakeCop', by:pv.me }, '🕵️','¡POLICÍA FALSO!', `<p>No eres el Policía. Por hacerte pasar por la ley: <b style="color:#fca5a5">${CONFIG.PEN_POLICE_FAIL} castigos</b>.</p>`);
+      return this.pvEventLocal('🤫','No eres el Policía', `<p>Solo el Policía puede acusar. Si acusa a alguien que te ha guiñado, te llegará un aviso para <b>testificar</b>.</p>`);
     }
     this.pickPlayerOverlay('👮 ¡ALTO!','¿A quién has visto guiñar el ojo?', this.pvOthers(), sus=>{
       if (sus===r.killer) return this.pvEvent({ type:'killer', who:sus, by:pv.me }, '🔪','¡ASESINO CAZADO!',
         `<p><b>${esc(sus)}</b> era el Asesino de verdad: bebe <b style="color:#fca5a5">${CONFIG.PEN_KILLER_CAUGHT} castigos</b>. Puede seguir matando… con cuidado 😏</p>`);
-      $('overlay-inner').innerHTML = `<div style="text-align:center" class="stack"><div style="font-size:3rem">🤨</div>
-        <h2>${esc(sus)} NO es el Asesino</h2><p>¿Le habéis pillado guiñando el ojo de verdad? Que lo confirme la víctima.</p>
-        <button class="btn btn-danger" id="w-yes">🎭 Sí, guiñó: es un impostor</button>
-        <button class="btn" id="w-no">🤦 No, me he equivocado</button></div>`;
-      $('w-yes').onclick = ()=>this.pvEvent({ type:'impostor', who:sus, by:pv.me }, '🎭','¡ASESINO FALSO!',
-        `<p><b>${esc(sus)}</b> guiñaba haciéndose pasar por el Asesino: <b style="color:#fca5a5">se acaba la bebida</b>.</p>`);
-      $('w-no').onclick = ()=>this.pvEvent({ type:'policeMiss', who:sus, by:pv.me }, '🤦','¡INOCENTE!',
-        `<p><b>${esc(sus)}</b> no ha hecho nada. Bebes <b style="color:#fca5a5">${CONFIG.PEN_POLICE_FAIL} castigos</b>. Y ahora todos saben que eres el Policía 👀</p>`);
+      this.startTestify(pv.me, sus, false);
     });
+  },
+  startTestify(cop, sus, onHost){
+    const id=NET.uid();
+    this._testify={ id, cop, sus, done:false, onHost };
+    if (onHost) this.game.online.seen.push(id); else this.pv.seen.push(id);
+    NET.pub('evt', { type:'testify', id, cop, sus, origin:NET.cid });
+    let left=25;
+    const draw=()=>{
+      if (!this._testify || this._testify.id!==id || this._testify.done) return;
+      $('overlay-inner').innerHTML = `<div style="text-align:center" class="stack"><div style="font-size:3rem">🤨</div>
+        <h2>${esc(sus)} NO es el Asesino…</h2>
+        <p>¿Era un impostor? Esperando a que la víctima testifique desde su móvil.</p>
+        <div class="code">${left}s</div>
+        ${onHost?`<button class="btn" id="t-yes">🗣️ La víctima no tiene móvil y lo confirma</button>`:''}</div>`;
+      $('overlay').classList.add('active');
+      if (onHost) $('t-yes').onclick=()=>this.resolveTestify(true,'un testigo');
+    };
+    draw();
+    this._testify.timer=setInterval(()=>{ left--; if (left<=0) return this.resolveTestify(false); draw(); },1000);
+  },
+  resolveTestify(yes, by){
+    const t=this._testify; if (!t || t.done) return;
+    t.done=true; clearInterval(t.timer); this._testify=null;
+    const e = yes ? { type:'impostor', who:t.sus, by:t.cop, witness:by, ref:t.id } : { type:'policeMiss', who:t.sus, by:t.cop, ref:t.id };
+    const icon = yes?'🎭':'🤦', title = yes?'¡ASESINO FALSO!':'¡NADIE LO CONFIRMA!';
+    const body = yes ? `<p><b>${esc(by)}</b> confirma que <b>${esc(t.sus)}</b> le guiñó. Era un impostor: <b style="color:#fca5a5">se acaba la bebida</b>.</p>`
+                     : `<p>Ninguna víctima ha testificado contra <b>${esc(t.sus)}</b>. <b>${esc(t.cop)}</b> (el Policía) bebe <b style="color:#fca5a5">${CONFIG.PEN_POLICE_FAIL} castigos</b> 👀</p>`;
+    if (t.onHost){
+      const g=this.game; yes ? g.stats.impostors=(g.stats.impostors||0)+1 : g.stats.policeMisses++;
+      e.id=NET.uid(); e.origin=NET.cid; g.online.seen.push(e.id); NET.pub('evt', e);
+      this.resultOverlay(icon, title, body, true);
+    } else this.pvEvent(e, icon, title, body);
+  },
+  witnessPrompt(d, me){
+    if (!me || me===d.cop || me===d.sus) return;
+    this._witnessFor=d.id;
+    $('overlay-inner').innerHTML = `<div style="text-align:center" class="stack"><div style="font-size:3rem">👮</div>
+      <h2>¿Te ha guiñado ${esc(d.sus)}?</h2>
+      <p><b>${esc(d.cop)}</b> (el Policía) acusa a <b>${esc(d.sus)}</b> de haber guiñado el ojo. Si te lo ha guiñado a ti, testifica.</p>
+      <button class="btn btn-danger" id="w-yes">😵 Sí, me guiñó a mí</button>
+      <button class="btn" id="w-no">No, a mí no</button></div>`;
+    $('overlay').classList.add('active');
+    try{ navigator.vibrate && navigator.vibrate([200,100,200]); }catch(e){}
+    $('w-yes').onclick=()=>{ NET.pub('evt', { type:'testimony', ref:d.id, by:me, yes:true, id:NET.uid(), origin:NET.cid }); this._witnessFor=null; this.closeOverlay(); this.toast('🗣️ Has testificado. Gracias por tu servicio, ciudadano 🫡'); };
+    $('w-no').onclick=()=>{ this._witnessFor=null; this.closeOverlay(); };
+  },
+  netTestifyMsg(d, me){
+    // devuelve true si el mensaje es de testimonio y ya está gestionado
+    if (d.type==='testify'){ this.witnessPrompt(d, me); return !me || me===d.cop || me===d.sus ? false : true; }
+    if (d.type==='testimony'){ if (this._testify && this._testify.id===d.ref && d.yes) this.resolveTestify(true, d.by); return true; }
+    if ((d.type==='impostor'||d.type==='policeMiss') && d.ref && this._witnessFor===d.ref){ this._witnessFor=null; this.closeOverlay(); }
+    return false;
   },
   pvDouble(){
     const pv=this.pv, r=pv.setup.roles, rest=this.pvOthers();
