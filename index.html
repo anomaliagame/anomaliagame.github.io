@@ -352,7 +352,8 @@ const CONFIG = {
   PEN_POLICE_FAIL: 3,         // el policía acusa a un inocente
   PEN_KILL: 2,                // víctima del guiño del asesino
   PEN_KILLER_CAUGHT: 8,       // cazan al Asesino de verdad
-  PEN_DOUBLE_FAIL: 6,         // doble guiño: la víctima señala mal (sus 2 + 4 de multa)
+  PEN_DOUBLE_FAIL: 6,
+  TESTIFY_SECONDS: 10,        // tiempo máximo para que testifique una víctima         // doble guiño: la víctima señala mal (sus 2 + 4 de multa)
   REWARD_MISSION: 3,          // castigos que repartes por misión cumplida
   STORAGE_KEY: 'anomalia_v2'
 };
@@ -1331,7 +1332,7 @@ class App {
         <ul><li>Pilla al Asesino de verdad: el Asesino bebe <b>${CONFIG.PEN_KILLER_CAUGHT}</b>. Puede seguir matando, pero cada vez que le cacen vuelve a beber ${CONFIG.PEN_KILLER_CAUGHT}.</li>
         <li>Pilla a un impostor que guiñaba: el impostor se acaba la bebida.</li>
         <li>Si el acusado no es el Asesino, a todos les llega un aviso: <b>«¿Te ha guiñado a ti?»</b>. Si la víctima testifica que sí, el impostor se acaba la bebida.</li>
-        <li>Si nadie testifica en 25 segundos: el Policía bebe <b>${CONFIG.PEN_POLICE_FAIL}</b> (y queda descubierto).</li>
+        <li>Si nadie testifica (o todos dicen que a ellos no les guiñó), en como mucho ${CONFIG.TESTIFY_SECONDS} segundos: el Policía bebe <b>${CONFIG.PEN_POLICE_FAIL}</b> (y queda descubierto).</li>
         <li>Solo el Policía puede acusar. Los demás solo pueden testificar cuando él acusa.</li></ul></li>
       <li><b>🎭 Asesino falso:</b> si alguien guiña haciéndose pasar por el Asesino y le pilla el Policía, <b>se acaba la bebida entera</b>. Hacer trampas sale más caro que ser el Asesino.</li>
       <li>El Policía también puede ser víctima del Asesino.</li></ul>
@@ -1870,21 +1871,26 @@ Object.assign(App.prototype, {
   },
   startTestify(cop, sus, onHost){
     const id=NET.uid();
-    this._testify={ id, cop, sus, done:false, onHost };
+    const joined = onHost ? this.game.online.joined : this.pv.joined;
+    const players = onHost ? this.game.players : this.pv.setup.players;
+    const witnesses = players.filter(p=>p!==cop && p!==sus && joined[p]);
+    this._testify={ id, cop, sus, done:false, onHost, witnesses, noes:[] };
     if (onHost) this.game.online.seen.push(id); else this.pv.seen.push(id);
     NET.pub('evt', { type:'testify', id, cop, sus, origin:NET.cid });
-    let left=25;
+    let left=CONFIG.TESTIFY_SECONDS;
+    if (!witnesses.length && !onHost){ this._testify.timer=null; return this.resolveTestify(false); }
     const draw=()=>{
       if (!this._testify || this._testify.id!==id || this._testify.done) return;
       $('overlay-inner').innerHTML = `<div style="text-align:center" class="stack"><div style="font-size:3rem">🤨</div>
         <h2>${esc(sus)} NO es el Asesino…</h2>
-        <p>¿Era un impostor? Esperando a que la víctima testifique desde su móvil.</p>
+        <p>¿Era un impostor? Esperando a que la víctima testifique desde su móvil (${this._testify.noes.length}/${witnesses.length} han dicho que no).</p>
         <div class="code">${left}s</div>
         ${onHost?`<button class="btn" id="t-yes">🗣️ La víctima no tiene móvil y lo confirma</button>`:''}</div>`;
       $('overlay').classList.add('active');
       if (onHost) $('t-yes').onclick=()=>this.resolveTestify(true,'un testigo');
     };
     draw();
+    this._testify.redraw=draw;
     this._testify.timer=setInterval(()=>{ left--; if (left<=0) return this.resolveTestify(false); draw(); },1000);
   },
   resolveTestify(yes, by){
@@ -1911,12 +1917,25 @@ Object.assign(App.prototype, {
     $('overlay').classList.add('active');
     try{ navigator.vibrate && navigator.vibrate([200,100,200]); }catch(e){}
     $('w-yes').onclick=()=>{ NET.pub('evt', { type:'testimony', ref:d.id, by:me, yes:true, id:NET.uid(), origin:NET.cid }); this._witnessFor=null; this.closeOverlay(); this.toast('🗣️ Has testificado. Gracias por tu servicio, ciudadano 🫡'); };
-    $('w-no').onclick=()=>{ this._witnessFor=null; this.closeOverlay(); };
+    $('w-no').onclick=()=>{ NET.pub('evt', { type:'testimony', ref:d.id, by:me, yes:false, id:NET.uid(), origin:NET.cid }); this._witnessFor=null; this.closeOverlay(); };
   },
   netTestifyMsg(d, me){
     // devuelve true si el mensaje es de testimonio y ya está gestionado
     if (d.type==='testify'){ this.witnessPrompt(d, me); return !me || me===d.cop || me===d.sus ? false : true; }
-    if (d.type==='testimony'){ if (this._testify && this._testify.id===d.ref && d.yes) this.resolveTestify(true, d.by); return true; }
+    if (d.type==='testimony'){
+      const t=this._testify;
+      if (t && t.id===d.ref){
+        if (d.yes) this.resolveTestify(true, d.by);
+        else {
+          if (!t.noes.includes(d.by)) t.noes.push(d.by);
+          // todos los testigos conectados han dicho que no: no hace falta esperar
+          if (t.witnesses.every(w=>t.noes.includes(w)) && !t.onHost) this.resolveTestify(false);
+          else if (t.witnesses.every(w=>t.noes.includes(w)) && t.onHost) this.resolveTestify(false);
+          else t.redraw && t.redraw();
+        }
+      }
+      return true;
+    }
     if ((d.type==='impostor'||d.type==='policeMiss') && d.ref && this._witnessFor===d.ref){ this._witnessFor=null; this.closeOverlay(); }
     return false;
   },
