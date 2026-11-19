@@ -1,0 +1,1857 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0b0f19">
+<title>ANOMALÍA</title>
+<style>
+:root{
+  --bg:#0b0f19;--card:#151c2c;--card2:#1b2438;--border:#26324d;--text:#f1f5f9;--muted:#94a3b8;
+  --cyan:#06b6d4;--purple:#a855f7;--pink:#ec4899;--amber:#f59e0b;--red:#ef4444;--green:#10b981;
+  --r-lg:20px;--r-md:14px;--r-sm:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;touch-action:manipulation;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+html,body{background:var(--bg);color:var(--text)}
+body{min-height:100vh;min-height:100dvh;display:flex;justify-content:center;
+  padding:calc(10px + env(safe-area-inset-top)) 12px calc(14px + env(safe-area-inset-bottom))}
+button,input,select,textarea{font:inherit;color:inherit}
+#app{width:100%;max-width:480px;display:flex;flex-direction:column;min-height:calc(100dvh - 30px)}
+.screen{display:none;flex-direction:column;flex:1;animation:fade .25s ease-out}
+.screen.active{display:flex}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{transform:scale(.96);opacity:.4}100%{transform:none;opacity:1}}
+h1,h2,h3{font-weight:800;letter-spacing:-.02em}
+.btn{background:#1e293b;border:1px solid var(--border);padding:14px 18px;border-radius:var(--r-md);font-size:1rem;
+  font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;user-select:none;
+  -webkit-user-select:none;transition:transform .08s,background .15s}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.4}
+.btn-primary{background:linear-gradient(135deg,var(--cyan),#0284c7);border:none;color:#fff;box-shadow:0 4px 14px rgba(6,182,212,.3)}
+.btn-danger{background:rgba(239,68,68,.12);border-color:var(--red);color:#fca5a5}
+.btn-ok{background:rgba(16,185,129,.15);border-color:var(--green);color:#6ee7b7}
+.btn-purple{background:rgba(168,85,247,.15);border-color:var(--purple);color:#d8b4fe}
+.btn-sm{padding:8px 12px;font-size:.85rem;border-radius:var(--r-sm)}
+.btn-icon{width:44px;height:44px;padding:0;border-radius:50%;font-size:1.1rem}
+.btn-block{width:100%}
+.input{background:#1e293b;border:1px solid var(--border);padding:12px 14px;border-radius:var(--r-md);font-size:1rem;outline:none;width:100%}
+.input:focus{border-color:var(--cyan)}
+.header{display:flex;justify-content:space-between;align-items:center;padding:4px 0 12px;border-bottom:1px solid var(--border);margin-bottom:12px;gap:8px}
+.title-grad{font-size:1.2rem;background:linear-gradient(90deg,var(--cyan),var(--purple));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.muted{color:var(--muted)}.small{font-size:.85rem}.tiny{font-size:.75rem}
+.stack{display:flex;flex-direction:column;gap:10px}
+.row{display:flex;gap:8px;align-items:center}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:var(--r-md);padding:14px}
+.scroll{overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch}
+
+/* HOME */
+#screen-home{justify-content:center;text-align:center;gap:26px}
+.hero{font-size:3.1rem;letter-spacing:3px;background:linear-gradient(135deg,#06b6d4,#a855f7,#ec4899);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+
+/* PLAYERS */
+.player-row{display:flex;gap:8px;align-items:center}
+.player-row .num{width:24px;color:var(--muted);font-weight:700;text-align:center}
+
+/* GAME */
+.rules-bar{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.35);border-radius:var(--r-md);padding:10px 12px;margin-bottom:10px;display:none}
+.rules-bar .lbl{font-size:.72rem;color:#fca5a5;font-weight:800;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;display:flex;justify-content:space-between}
+.rule-item{font-size:.86rem;padding:3px 0;display:flex;gap:6px;align-items:flex-start;line-height:1.35}
+.rule-item .tag{flex-shrink:0;font-size:.7rem;font-weight:800;padding:2px 6px;border-radius:8px;margin-top:1px}
+.tag-v{background:rgba(239,68,68,.25);color:#fca5a5}
+.tag-t{background:rgba(245,158,11,.22);color:#fcd34d}
+.game-card{background:var(--card);border:2px solid var(--border);border-radius:var(--r-lg);padding:18px;display:flex;flex-direction:column;gap:12px;box-shadow:0 10px 25px -5px rgba(0,0,0,.5);animation:pop .25s ease-out}
+.badge{align-self:flex-start;padding:4px 12px;border-radius:20px;font-size:.72rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#fff}
+.card-title{font-size:1.35rem}
+.card-text{font-size:1.1rem;line-height:1.5}
+.meta{background:rgba(0,0,0,.22);padding:10px 12px;border-radius:var(--r-md);display:flex;flex-direction:column;gap:6px}
+.meta-row{display:flex;justify-content:space-between;gap:10px;font-size:.88rem}
+.meta-row .v{font-weight:700;text-align:right}
+.timer{display:flex;align-items:center;justify-content:space-between;background:#0f172a;padding:8px 12px;border-radius:var(--r-md)}
+.timer .t{font-size:1.4rem;font-weight:800;color:var(--amber);min-width:70px;text-align:center}
+.fb{display:flex;align-items:center;justify-content:space-between;background:rgba(0,0,0,.25);padding:6px 10px;border-radius:var(--r-md);border:1px solid var(--border)}
+.fb-btn{background:#1e293b;border:1px solid var(--border);padding:6px 12px;border-radius:var(--r-sm);font-size:.85rem;cursor:pointer}
+.fb-btn.liked{background:rgba(16,185,129,.2);border-color:var(--green);color:var(--green)}
+.fb-btn.disliked{background:rgba(239,68,68,.2);border-color:var(--red);color:var(--red)}
+.actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px}
+.actions .btn{padding:12px 6px;font-size:.82rem;flex-direction:column;gap:2px}
+.actions .btn span{font-size:1.2rem}
+
+/* MINIGAMES */
+.mini{background:#0f172a;border:1px solid var(--border);border-radius:var(--r-md);padding:12px;display:flex;flex-direction:column;gap:10px}
+.cards-row{display:flex;flex-wrap:wrap;gap:6px}
+.pcard{background:#f8fafc;color:#0f172a;border-radius:8px;padding:6px 8px;font-weight:800;font-size:1rem;min-width:44px;text-align:center}
+.pcard.red{color:#dc2626}
+.deal-list{display:flex;flex-direction:column;gap:6px}
+.deal-item{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-radius:var(--r-sm);background:var(--card2)}
+.deal-item.match{background:rgba(245,158,11,.2);border:1px solid var(--amber)}
+.result-line{font-size:.9rem;padding:4px 0;border-bottom:1px dashed var(--border)}
+
+/* SETTINGS */
+.setting-title{font-size:.8rem;color:var(--muted);margin:16px 0 8px;text-transform:uppercase;letter-spacing:1px;font-weight:700}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.check{background:#1e293b;padding:11px;border-radius:var(--r-sm);font-size:.88rem;display:flex;align-items:center;gap:8px;border:1px solid var(--border);cursor:pointer}
+.check input{width:18px;height:18px;accent-color:var(--cyan)}
+.seg{display:flex;background:#1e293b;border:1px solid var(--border);border-radius:var(--r-sm);overflow:hidden}
+.seg button{flex:1;padding:10px;border:none;background:none;font-weight:700;cursor:pointer}
+.seg button.on{background:var(--cyan);color:#fff}
+.custom-item{display:flex;justify-content:space-between;gap:8px;align-items:center;background:var(--card2);padding:8px 10px;border-radius:var(--r-sm);font-size:.85rem}
+
+/* OVERLAY / MODAL */
+.overlay{position:fixed;inset:0;background:rgba(5,8,15,.97);z-index:100;display:none;flex-direction:column;align-items:center;justify-content:center;
+  padding:calc(20px + env(safe-area-inset-top)) 18px calc(20px + env(safe-area-inset-bottom))}
+.overlay.active{display:flex}
+.overlay-inner{width:100%;max-width:440px;max-height:100%;overflow-y:auto;display:flex;flex-direction:column;gap:12px;animation:pop .2s ease-out}
+.modal-back{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-back.active{display:flex}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px;width:100%;max-width:400px;display:flex;flex-direction:column;gap:14px;animation:pop .18s ease-out}
+.modal p{line-height:1.45}
+.pick-list{display:flex;flex-direction:column;gap:8px}
+.secret-box{background:var(--card);border:2px dashed var(--purple);border-radius:var(--r-lg);padding:20px 16px;text-align:center;display:flex;flex-direction:column;gap:14px;align-items:center}
+.mission{background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px;text-align:left;font-size:.92rem;line-height:1.4;display:flex;flex-direction:column;gap:8px;width:100%}
+.mission.done{border-color:var(--green);background:rgba(16,185,129,.08)}
+.mission.caught{border-color:var(--red);background:rgba(239,68,68,.08);opacity:.8}
+.role-box{background:rgba(168,85,247,.1);border:1px solid var(--purple);border-radius:var(--r-sm);padding:10px;font-size:.9rem;line-height:1.45;text-align:left;width:100%}
+.rules-doc h3{margin:18px 0 6px;font-size:1.05rem;color:var(--cyan)}
+.rules-doc p,.rules-doc li{font-size:.93rem;line-height:1.5;color:#e2e8f0}
+.rules-doc ul{margin-left:18px;display:flex;flex-direction:column;gap:4px}
+.end-player{background:var(--card2);border-radius:var(--r-md);padding:12px;display:flex;flex-direction:column;gap:6px}
+.roast{font-style:italic;color:#fcd34d;font-size:.88rem}
+.bomb{position:fixed;inset:0;z-index:300;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px;
+  background:#dc2626;color:#fff;animation:flash .35s steps(2) infinite}
+.bomb.active{display:flex}
+@keyframes flash{0%{background:#dc2626}50%{background:#f59e0b}}
+.toast{position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top));transform:translateX(-50%);z-index:250;width:calc(100% - 24px);max-width:460px;
+  background:#1e293b;border:1px solid var(--amber);border-radius:var(--r-md);padding:12px 14px;font-size:.95rem;line-height:1.4;box-shadow:0 10px 25px rgba(0,0,0,.6);animation:pop .2s ease-out}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#64748b;margin-right:4px}
+.dot.on{background:var(--green)}.dot.off{background:var(--red)}
+.qr{background:#fff;padding:12px;border-radius:var(--r-md);display:flex;justify-content:center;align-self:center}
+.qr img,.qr svg{display:block;width:210px;height:210px}
+.code{font-size:2rem;font-weight:800;letter-spacing:6px;text-align:center;color:var(--amber)}
+.status-row{display:flex;justify-content:space-between;align-items:center;background:var(--card2);padding:10px 12px;border-radius:var(--r-sm);gap:8px}
+.blur{filter:blur(9px);pointer-events:none;user-select:none}
+.fb-item{background:var(--card);border:1px solid var(--border);border-radius:var(--r-md);padding:10px;margin-bottom:8px;font-size:.85rem}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- INICIO -->
+<section id="screen-home" class="screen active">
+  <div>
+    <h1 class="hero">ANOMALÍA</h1>
+    <p class="muted" style="line-height:1.45">Retos, caos y misiones secretas.<br>Todos tienen algo que esconder. 🕵️</p>
+  </div>
+  <div class="stack">
+    <button class="btn btn-primary" id="btn-continue" style="display:none" onclick="app.continueGame()">▶ CONTINUAR PARTIDA</button>
+    <button class="btn btn-primary" onclick="app.nav('players')">NUEVA PARTIDA</button>
+    <button class="btn" onclick="app.openRules()">📜 REGLAS</button>
+    <button class="btn" onclick="app.nav('settings')">⚙️ AJUSTES Y CARTAS</button>
+  </div>
+</section>
+
+<!-- JUGADORES -->
+<section id="screen-players" class="screen">
+  <div class="header">
+    <button class="btn btn-sm" onclick="app.nav('home')">←</button>
+    <h2 class="title-grad">¿QUIÉN JUEGA?</h2>
+    <span class="muted small" id="player-count"></span>
+  </div>
+  <p class="muted small">De 3 a 12 jugadores. Sin nombres repetidos.</p>
+  <div class="stack scroll" id="player-list" style="margin:12px 0;max-height:52vh"></div>
+  <div class="row" style="margin-bottom:14px">
+    <input id="new-player" class="input" placeholder="Nombre del jugador" maxlength="15" enterkeyhint="done">
+    <button class="btn" onclick="app.addPlayer()">Añadir</button>
+  </div>
+  <button class="btn btn-primary btn-block" style="margin-top:auto" onclick="app.startGame()">EMPEZAR PARTIDA</button>
+</section>
+
+<!-- REVELACIÓN -->
+<section id="screen-reveal" class="screen">
+  <div class="header"><h2 class="title-grad">FASE SECRETA</h2><span class="muted small" id="reveal-progress"></span></div>
+  <div style="text-align:center;margin:8px 0 4px">
+    <p class="muted small">Pasa el móvil a:</p>
+    <h1 id="reveal-name" style="font-size:2.1rem;color:var(--cyan);margin-top:4px">--</h1>
+  </div>
+  <div class="secret-box" style="margin-top:12px">
+    <div id="reveal-hidden" class="stack" style="align-items:center">
+      <p class="muted">Que nadie más mire la pantalla 👀</p>
+      <button class="btn btn-purple" onclick="app.revealShow()">👁️ VER MI ROL Y MISIONES</button>
+    </div>
+    <div id="reveal-content" style="display:none;width:100%" class="stack"></div>
+  </div>
+  <button class="btn btn-primary btn-block" id="btn-reveal-next" style="margin-top:auto;display:none" onclick="app.revealNext()">OCULTAR Y PASAR ➔</button>
+</section>
+
+<!-- JUEGO -->
+<section id="screen-game" class="screen">
+  <div class="header">
+    <span class="title-grad">ANOMALÍA <span id="act-net"></span></span>
+    <div class="row">
+      <button class="btn btn-icon" onclick="app.openRules()" aria-label="Reglas">📜</button>
+      <button class="btn btn-icon" onclick="app.nav('feedback')" aria-label="Feedback">📊</button>
+      <button class="btn btn-icon" onclick="app.nav('settings')" aria-label="Ajustes">⚙️</button>
+    </div>
+  </div>
+
+  <div class="rules-bar" id="rules-bar">
+    <div class="lbl"><span>⚠️ Reglas activas</span><span class="muted tiny" style="text-transform:none;letter-spacing:0">Incumplir = 2 castigos</span></div>
+    <div id="rules-list"></div>
+  </div>
+
+  <div class="game-card" id="game-card">
+    <div class="row" style="justify-content:space-between">
+      <span class="badge" id="c-badge">CAT</span>
+      <span class="muted small" id="c-round">Ronda 1</span>
+    </div>
+    <h2 class="card-title" id="c-title"></h2>
+    <p class="card-text" id="c-text"></p>
+    <div id="c-mini"></div>
+    <div class="timer" id="c-timer" style="display:none">
+      <span class="small muted">Tiempo</span>
+      <span class="t" id="c-timer-t">0s</span>
+      <button class="btn btn-sm" id="c-timer-btn" onclick="app.toggleTimer()">⏱ Empezar</button>
+    </div>
+    <div class="meta">
+      <div class="meta-row"><span class="muted">Participan</span><span class="v" id="c-part"></span></div>
+      <div class="meta-row"><span class="muted">Castigo</span><span class="v" style="color:#fca5a5" id="c-pen"></span></div>
+    </div>
+    <div class="fb">
+      <span class="tiny muted">¿Te gusta esta carta?</span>
+      <div class="row">
+        <button class="fb-btn" id="fb-like" onclick="app.rate(true)">👍</button>
+        <button class="fb-btn" id="fb-dislike" onclick="app.rate(false)">👎 Cambiar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions" id="mystery-actions">
+    <button class="btn btn-purple" id="act-1" onclick="app.game&&app.game.online?app.openLobbyOverlay():app.openMyMissions()"><span>🔒</span>Mis misiones</button>
+    <button class="btn btn-danger" onclick="app.openAccuse()"><span>🚨</span>¡Anomalía!</button>
+    <button class="btn" onclick="app.openWink()"><span>🔪</span>Guiños</button>
+  </div>
+
+  <button class="btn btn-primary btn-block" style="margin-top:12px;padding:18px;font-size:1.1rem" onclick="app.nextCard()">Siguiente carta ➔</button>
+  <button class="btn btn-danger btn-sm" style="margin-top:8px" onclick="app.endGame()">Terminar partida</button>
+</section>
+
+<!-- FEEDBACK -->
+<section id="screen-feedback" class="screen">
+  <div class="header">
+    <h2 class="title-grad">📊 FEEDBACK</h2>
+    <button class="btn btn-sm" onclick="app.back()">Volver</button>
+  </div>
+  <p class="muted small" style="margin-bottom:10px">Copia el informe y pégalo en el chat para ajustar las cartas.</p>
+  <div class="scroll" id="fb-list" style="margin-bottom:10px"></div>
+  <textarea id="fb-text" class="input" style="display:none;height:140px;margin-bottom:8px;font-size:.75rem" readonly></textarea>
+  <div class="row">
+    <button class="btn btn-primary" style="flex:2" onclick="app.copyFeedback()">📋 COPIAR</button>
+    <button class="btn btn-danger" style="flex:1" onclick="app.clearFeedback()">Borrar</button>
+  </div>
+</section>
+
+<!-- FIN -->
+<section id="screen-gameover" class="screen">
+  <div class="header"><h2 class="title-grad">🏁 FIN DE LA PARTIDA</h2></div>
+  <div class="scroll stack" id="end-content"></div>
+  <button class="btn btn-primary btn-block" style="margin-top:12px" onclick="app.nav('home')">VOLVER AL INICIO</button>
+</section>
+
+<!-- SALA (móvil principal) -->
+<section id="screen-lobby" class="screen">
+  <div class="header"><h2 class="title-grad">📱 SALA</h2><span class="small" id="lobby-net"></span></div>
+  <div class="scroll stack" id="lobby-content"></div>
+  <button class="btn btn-primary btn-block" style="margin-top:12px" onclick="app.lobbyStart()">EMPEZAR A JUGAR ➔</button>
+</section>
+
+<!-- JUGADOR: ELEGIR NOMBRE -->
+<section id="screen-join" class="screen">
+  <div style="text-align:center;margin:20px 0 10px">
+    <h1 class="hero" style="font-size:2.4rem">ANOMALÍA</h1>
+    <p class="muted" id="join-sub">Conectando con la partida…</p>
+  </div>
+  <div class="stack" id="join-list"></div>
+</section>
+
+<!-- JUGADOR: MI PANTALLA -->
+<section id="screen-me" class="screen">
+  <div class="header">
+    <span class="title-grad" id="me-name">--</span>
+    <div class="row"><span class="small" id="me-net"></span>
+      <button class="btn btn-icon" onclick="app.openRules()" aria-label="Reglas">📜</button></div>
+  </div>
+  <div class="stack" id="me-content"></div>
+</section>
+
+<!-- AJUSTES -->
+<section id="screen-settings" class="screen">
+  <div class="header">
+    <h2 class="title-grad">⚙️ AJUSTES</h2>
+    <button class="btn btn-sm btn-primary" onclick="app.back()">OK</button>
+  </div>
+  <div class="scroll">
+    <div class="setting-title">Misterio</div>
+    <label class="check"><input type="checkbox" id="set-mystery" onchange="app.setMystery(this.checked)"> Roles (Asesino y Policía) y misiones secretas</label>
+    <label class="check" style="margin-top:8px"><input type="checkbox" id="set-online" onchange="app.setOnline(this.checked)"> 📱 Cada uno ve sus misiones en su móvil (necesita internet)</label>
+    <div class="setting-title">Misiones por jugador</div>
+    <div class="seg" id="set-missions">
+      <button data-v="2" onclick="app.setMissions(2)">2</button>
+      <button data-v="3" onclick="app.setMissions(3)">3</button>
+    </div>
+    <p class="tiny muted" style="margin-top:6px">Se aplica en la siguiente partida.</p>
+    <div class="setting-title">Contenido</div>
+    <label class="check"><input type="checkbox" id="set-hot" onchange="app.setHot(this.checked)"> 🔥 Cartas +18 / humor negro (<span id="hot-count">0</span>)</label>
+    <div class="setting-title">Categorías activas</div>
+    <div class="grid2" id="set-cats"></div>
+
+    <div class="setting-title">➕ Añadir carta</div>
+    <div class="panel stack">
+      <select id="cu-cat" class="input"></select>
+      <input id="cu-title" class="input" placeholder="Título (ej: EL DISCURSO)" maxlength="40">
+      <textarea id="cu-text" class="input" rows="3" placeholder="Texto. Usa {J1} y {J2} para meter nombres al azar."></textarea>
+      <input id="cu-pen" class="input" placeholder="Castigo (ej: 3 castigos a {J1})" maxlength="60">
+      <div class="row">
+        <input id="cu-time" class="input" type="number" inputmode="numeric" min="0" max="300" placeholder="Segundos (opcional)">
+        <label class="check" style="flex-shrink:0"><input type="checkbox" id="cu-hot"> 🔥 +18</label>
+      </div>
+      <button class="btn btn-primary" onclick="app.addCustom()">Guardar carta</button>
+    </div>
+    <div class="setting-title">Tus cartas (<span id="cu-count">0</span>)</div>
+    <div class="stack" id="cu-list" style="margin-bottom:20px"></div>
+  </div>
+</section>
+
+</div>
+
+<!-- OVERLAY PRIVADO / FLUJOS -->
+<div class="overlay" id="overlay"><div class="overlay-inner" id="overlay-inner"></div></div>
+
+<!-- BOMBA -->
+<div class="bomb" id="bomb" onclick="app.closeBomb()">
+  <div style="font-size:7rem">💥</div>
+  <h1 style="font-size:2.6rem">¡BOOM!</h1>
+  <p style="font-size:1.2rem;font-weight:700">¡Hinchad los mofletes!<br>El último bebe 3.</p>
+  <p class="small" style="opacity:.8;margin-top:20px">Toca para cerrar</p>
+</div>
+
+<!-- MODAL -->
+<div class="modal-back" id="modal-back"><div class="modal" id="modal"></div></div>
+
+<script src="mqtt.min.js"></script>
+<script src="qrcode.js"></script>
+<script>
+/* =====================================================================
+   1. CONFIGURACIÓN (pesos y límites fáciles de tocar)
+   ===================================================================== */
+const CONFIG = {
+  MIN_PLAYERS: 3, MAX_PLAYERS: 12,
+  MAX_VIRUS: 2,               // virus a la vez; el 3º echa al más antiguo
+  PEN_CAUGHT: 5,              // te pillan haciendo una misión
+  PEN_FALSE_ACCUSE: 3,        // acusas de anomalía y no lo era
+  PEN_POLICE_FAIL: 3,         // el policía acusa a un inocente
+  PEN_KILL: 2,                // víctima del guiño del asesino
+  PEN_KILLER_CAUGHT: 8,       // cazan al Asesino de verdad
+  PEN_DOUBLE_FAIL: 6,         // doble guiño: la víctima señala mal (sus 2 + 4 de multa)
+  REWARD_MISSION: 3,          // castigos que repartes por misión cumplida
+  STORAGE_KEY: 'anomalia_v2'
+};
+
+const CATEGORIES = {
+  YO_NUNCA:       { name: 'YO NUNCA',        icon: '🙋', color: '#0891b2', weight: 16 },
+  RETO:           { name: 'RETO',            icon: '🎯', color: '#d97706', weight: 16 },
+  CAOS:           { name: 'CAOS',            icon: '🌀', color: '#db2777', weight: 16 },
+  MINIJUEGO:      { name: 'MINIJUEGO',       icon: '🎮', color: '#4f46e5', weight: 16 },
+  VOTACION:       { name: 'VOTACIÓN',        icon: '🗳️', color: '#7c3aed', weight: 16 },
+  VIRUS:          { name: 'VIRUS',           icon: '☣️', color: '#dc2626', weight: 14 },
+  CASTIGO_MAXIMO: { name: 'CASTIGO MÁXIMO',  icon: '💥', color: '#991b1b', weight: 6 }
+};
+
+/* =====================================================================
+   2. DATOS: palabras, misiones y cartas
+   ===================================================================== */
+const PHRASES = ['Mi abuela tiene un tatuaje en el culo','Ayer me comí una pizza entera en el ascensor','El perro del vecino me ha robado las zapatillas',
+  'Quiero ser astronauta pero me dan miedo las alturas','Me he enamorado de la cajera del Mercadona','Esta noche voy a dormir en la bañera',
+  'Mi suegra baila reguetón en los funerales','He perdido las llaves dentro de la nevera','Mañana me caso con un pingüino',
+  'Me han echado del gimnasio por llorar','Mi coche funciona con zumo de naranja','El cura me ha pillado bebiendo en misa',
+  'Necesito un abrazo y una pizza ya','Mi gato conduce mejor que yo','Me he tatuado tu nombre en la espalda',
+  'Tengo un primo que vende cabras por internet','He vomitado en un taxi y me han cobrado el doble','Mi madre me ha bloqueado en WhatsApp',
+  'Voy al baño, si no vuelvo quedaos mi bebida','Anoche soñé que era una patata frita','El camarero me ha guiñado el ojo dos veces',
+  'Quiero bailar salsa encima de la mesa','Me he quedado encerrado en un ascensor con mi ex','Mi jefe me ha visto borracho en Instagram',
+  'Las palomas me persiguen desde pequeño','Me tocó la lotería y me la gasté en chicles','Mi abuelo liga más que yo en Tinder',
+  'Se me ha caído el móvil al váter otra vez','Este sábado empiezo clases de ballet','Por favor, que alguien me rasque la espalda'];
+const FILLERS = ['tío / tía','en plan','vale','o sea','literal','bro','qué fuerte','buah','venga','mazo','rollo','nada','bueno','joder','hostia','eh','guay','flipar','típico','total'];
+const ACCENTS = ['andaluz','argentino','mexicano','ruso','francés','pijo','gallego','italiano','canario','vasco cerrado','alemán','de telenovela'];
+const LETTERS = ['A','E','O','I','R','S','L','N'];
+const CULT_WORDS = ['Sustancialmente','Glicerina','Fluvial','Epílogo','Petricor','Inefable','Ubicuidad','Soslayar','Efímero','Cándido',
+  'Bizarro','Superfluo','Inextricable','Magnánimo','Recóndito','Vituperar','Prolijo','Hálito','Aforismo','Impávido',
+  'Melifluo','Disyuntiva','Quimérico','Anacrónico','Deferente','Soliloquio','Veleidad','Ablución','Pusilánime','Procaz'];
+const TRAP_WORDS = ['Termostato','Servilleta','Microondas','Paraguas','Cuchara','Batería','Semáforo','Calcetín','Ascensor','Enchufe',
+  'Bisagra','Bisabuelo','Linterna','Peaje','Equipaje'];
+
+// Misiones secretas (anomalías). fail = frase de humor negro si no la cumple.
+const MISSIONS = [
+  { id:'m1',  text:'Cambia tu vaso por el de otro jugador sin que esa persona se dé cuenta en el momento.', fail:'{P} no consiguió cambiar ni un vaso. En un trile de feria no duraría ni cinco minutos.' },
+  { id:'m2',  text:'Roba un objeto de la mesa (mechero, llaves, vaper…) y guárdalo en tu bolsillo o bolso sin que nadie te vea.', fail:'{P} no robó ni un mechero. La cárcel se ha perdido al peor delincuente de la historia.' },
+  { id:'m3',  text:'Ponte una prenda de otra persona (o una tuya del revés) y aguanta 2 cartas sin que nadie lo comente.', fail:'{P} fue tan discreto como un elefante en un ascensor.' },
+  { id:'m7',  text:'Suelta un refrán completamente inventado y consigue que nadie te lo discuta.', fail:'Como decía el abuelo de {P}: «quien no inventa refranes, bebe por los demás».' },
+  { id:'m8',  text:'Provoca que alguien pida que le aclaren las reglas de una carta.', fail:'{P} no consiguió que nadie le preguntara nada. Ya estaba acostumbrado: nunca le pregunta nadie.' },
+  { id:'m9',  text:'Haz que alguien se ría sin que tú digas ni una palabra.', fail:'{P} no hizo reír a nadie sin hablar. Hablando tampoco, para ser justos.' },
+  { id:'m10', text:'Logra que alguien diga el nombre de una persona que no está en la quedada.', fail:'{P} no logró que nadie mencionara a un ausente. Irónico: cuando {P} no está, nadie le menciona.' },
+  { id:'m11', text:'Consigue que alguien choque los cinco contigo de forma espontánea.', fail:'{P} se quedó con la mano levantada toda la noche. Como en el colegio.' },
+  { id:'m12', text:'Logra que otra persona repita exactamente la última palabra que has dicho.', fail:'Nadie repitió lo que dijo {P}. Normal, nadie le escucha.' },
+  { id:'m13', text:'Consigue que alguien mire fijamente al techo buscando algo.', fail:'{P} no hizo mirar al techo a nadie. La única que mira al techo pensando en {P} es su ex.' },
+  { id:'m14', text:'Consigue que alguien se levante a traerte algo (bebida, comida, un mechero…) sin que se lo pidas directamente.', fail:'{P} no consiguió que nadie se levantara. Ensayo general de su funeral: nadie se levantará a decir unas palabras.' },
+  { id:'m15', text:'Logra que alguien te pida perdón por cualquier tontería.', fail:'Nadie le pidió perdón a {P}. Ni Dios lo hará.' },
+  { id:'m16', text:'Consigue que alguien mueva o coloque un objeto de la mesa solo con señas.', fail:'{P} hizo señas toda la noche y nadie movió nada. Un mimo en paro lo habría hecho mejor.' },
+  { id:'m18', text:'Consigue que alguien te sirva o te llene el vaso solo con señas.', fail:'Nadie le sirvió a {P}. Morirá de sed… y solo.' },
+  { id:'m19', dynamic:'cult', text:'Cuela en la conversación estas 5 palabras a lo largo de la partida: {W}.', fail:'{P} no coló sus palabras cultas. La RAE ha presentado una denuncia.' },
+  { id:'m20', dynamic:'trap', text:'Consigue que al menos dos personas distintas digan estas palabras: {W}.', fail:'{P} no hizo decir ni una palabra trampa. Manipulador de cuarta división.' },
+  { id:'m21', text:'Esconde el vaso de alguien mientras está despistado, de forma que tenga que buscarlo.', fail:'{P} no consiguió esconder ni un vaso. Esconder cadáveres, mejor ni intentarlo.' },
+  { id:'m22', text:'Mete un objeto raro (un tapón, una cuchara, una servilleta…) en el bolsillo o la capucha de alguien sin que lo note.', fail:'{P} no metió nada en ningún bolsillo. Como carterista, ni de becario.' },
+  { id:'m23', text:'Llévate encima algo de otra persona (gafas, gorra, reloj, pulsera, mechero, chaqueta…) hasta que se dé cuenta él o ella sola.', fail:'{P} no fue capaz de quedarse con nada ajeno. Lo único que se queda son las ganas.' },
+  { id:'m24', text:'Hazle una foto a alguien sin que se entere. Enséñala al final de la partida como prueba.', fail:'{P} no hizo ni una foto a escondidas. Paparazzi con el carrete vacío.' },
+  { id:'m25', text:'Cuenta una anécdota inventada como si te hubiera pasado de verdad, y que nadie la ponga en duda.', fail:'{P} no coló ni una mentira. Su vida es tan aburrida que ni inventando.' },
+  { id:'m26', text:'Suelta una frase inventada de un famoso («como decía Einstein…») y que nadie te la discuta.', fail:'Como decía Einstein: «{P} no ha colado ni una cita». Y tenía razón.' },
+  { id:'m27', text:'Brinda por algo absurdo y consigue que al menos 3 personas brinden contigo.', fail:'Nadie brindó con {P}. En su boda tampoco brindará nadie.' },
+  { id:'m28', text:'Consigue que alguien cante contigo un trozo de una canción.', fail:'Nadie cantó con {P}. Ni en la ducha le hacen los coros.' },
+  { id:'m29', text:'Haz que dos personas se cambien de sitio entre ellas sin que lo pida ninguna carta.', fail:'{P} no movió a nadie de sitio. Tiene el poder de convocatoria de una charla sobre seguros.' }
+];
+
+const ROASTS_ALL_DONE = [
+  '{P} lo cumplió todo. Peligroso: no le dejéis solo con vuestra bebida.',
+  '{P} completó todas sus misiones. Que alguien revise si siguen ahí sus llaves.'
+];
+const ROASTS_CAUGHT = [
+  'A {P} le pillaron {N} vez/veces. Como agente secreto, un gran fontanero.',
+  '{P} fue cazado {N} vez/veces. La CIA ha llamado: que ni lo intente.'
+];
+
+// Cartas. Campos: id, cat, title, text, penalty, time (s), rule {kind:'virus'|'temp', rounds, text}, mini, hot, participants
+const CARDS = [
+  // ---------- YO NUNCA (20) ----------
+  { id:'yn1', cat:'YO_NUNCA', title:'BAÑO PÚBLICO', text:'Yo nunca he tenido que hacer mis necesidades en un baño público asqueroso por una emergencia.', penalty:'2 castigos los que SÍ' },
+  { id:'yn2', cat:'YO_NUNCA', title:'MONTE SALVAJE', text:'Yo nunca he tenido que cagar en el monte o en mitad de la naturaleza.', penalty:'2 castigos los que SÍ' },
+  { id:'yn3', cat:'YO_NUNCA', title:'ACCIDENTE', text:'Yo nunca he vomitado encima de alguien o he hecho que alguien vomite.', penalty:'3 castigos los que SÍ' },
+  { id:'yn4', cat:'YO_NUNCA', title:'MENSAJE CONFUSO', text:'Yo nunca he enviado un mensaje subido de tono a la persona equivocada.', penalty:'2 castigos los que SÍ' },
+  { id:'yn5', cat:'YO_NUNCA', title:'SIN PAGAR', text:'Yo nunca me he ido de un bar sin pagar, por despiste o a propósito.', penalty:'3 castigos los que SÍ' },
+  { id:'yn6', cat:'YO_NUNCA', title:'AMOR EN LA HABITACIÓN', text:'Yo nunca me he liado o he tenido algo con alguien de esta habitación.', penalty:'2 castigos los que SÍ' },
+  { id:'yn7', cat:'YO_NUNCA', title:'CEPILLO AJENO', text:'Yo nunca he usado el cepillo de dientes de otra persona sabiendo que no era mío.', penalty:'2 castigos los que SÍ' },
+  { id:'yn8', cat:'YO_NUNCA', title:'FALSO TE QUIERO', text:'Yo nunca he dicho «te quiero» a alguien sin sentirlo.', penalty:'2 castigos los que SÍ' },
+  { id:'yn9', cat:'YO_NUNCA', title:'CITA DESASTRE', text:'Yo nunca he tenido una cita que fuera un desastre absoluto.', penalty:'2 castigos los que SÍ' },
+  { id:'yn10', cat:'YO_NUNCA', title:'A ESCONDIDAS', text:'Yo nunca he mirado el móvil o las conversaciones de alguien a sus espaldas.', penalty:'2 castigos los que SÍ' },
+  { id:'yn11', cat:'YO_NUNCA', title:'FALSO ENFERMO', text:'Yo nunca he fingido estar enfermo para escaquearme de un plan.', penalty:'2 castigos los que SÍ' },
+  { id:'yn12', cat:'YO_NUNCA', title:'COTILLA EN REDES', text:'Yo nunca he cotilleado el perfil de la pareja o ex de un amigo por pura curiosidad.', penalty:'2 castigos los que SÍ' },
+  { id:'yn13', cat:'YO_NUNCA', title:'CUENTA FALSA', text:'Yo nunca he creado una cuenta falsa para cotillear a alguien.', penalty:'3 castigos los que SÍ' },
+  { id:'yn14', cat:'YO_NUNCA', title:'REGALO RECICLADO', text:'Yo nunca he regalado algo que me habían regalado a mí y no me gustaba.', penalty:'2 castigos los que SÍ' },
+  { id:'yn15', cat:'YO_NUNCA', title:'BLOQUEO IMPULSIVO', text:'Yo nunca he bloqueado a alguien tras un enfado y lo he desbloqueado a las pocas horas.', penalty:'2 castigos los que SÍ' },
+  { id:'yn16', cat:'YO_NUNCA', title:'NO TE HE VISTO', text:'Yo nunca he fingido no ver a alguien por la calle para no pararme a saludar.', penalty:'2 castigos los que SÍ' },
+  { id:'yn17', cat:'YO_NUNCA', title:'DORMIDO EN PÚBLICO', text:'Yo nunca me he quedado dormido en el transporte público y me he pasado de parada.', penalty:'2 castigos los que SÍ' },
+  { id:'yn18', cat:'YO_NUNCA', title:'COMIDA AJENA', text:'Yo nunca me he comido la comida de un compañero de piso o familiar y le he echado la culpa a otro.', penalty:'2 castigos los que SÍ' },
+  { id:'yn19', cat:'YO_NUNCA', title:'PRIMERA IMPRESIÓN', text:'Yo nunca he juzgado mal a alguien de este grupo antes de conocerle bien.', penalty:'2 castigos los que SÍ' },
+  { id:'yn20', cat:'YO_NUNCA', title:'TERRITORIO PROHIBIDO', text:'Yo nunca le he tirado la caña al ex o al rollo de un amigo.', penalty:'3 castigos los que SÍ' },
+
+  // ---------- RETO / OBSERVACIÓN (16) ----------
+  { id:'rt1', cat:'RETO', title:'MISIÓN: RISA', text:'{J1} tiene 25 segundos para conseguir que {J2} sonría o se ría, sin tocarle ni contar un chiste.', time:25, penalty:'3 castigos a {J1} si no lo consigue' },
+  { id:'rt2', cat:'RETO', title:'SONIDO DE ANIMAL', text:'El grupo elige un animal. Durante las próximas 3 cartas, {J1} tiene que hacer su sonido antes de hablar.', penalty:'2 castigos por cada olvido', rule:{ kind:'temp', rounds:3, text:'{J1}: sonido de animal antes de hablar' } },
+  { id:'rt3', cat:'RETO', title:'EL ESPEJO', text:'Durante las próximas 2 cartas, {J1} tiene que imitar todos los movimientos de {J2}.', penalty:'2 castigos a {J1} por cada fallo', rule:{ kind:'temp', rounds:2, text:'{J1} imita todos los movimientos de {J2}' } },
+  { id:'rt4', cat:'RETO', title:'ELOGIO SINCERO', text:'{J1} tiene 30 segundos para decirle 3 piropos emotivos a {J2} mirándole a los ojos y sin reírse.', time:30, penalty:'3 castigos si {J1} se ríe' },
+  { id:'rt16', cat:'RETO', title:'LENGUA DE SIGNOS', text:'{J1} se queda sin voz un minuto y se inventa su propia lengua de signos. Mira tu frase en secreto y transmítesela a {J2} solo con signos: sin hablar, sin escribir y sin señalar objetos.', mini:'frase', time:60, penalty:'3 castigos a los dos si {J2} no la adivina' },
+  { id:'rt5', cat:'RETO', title:'LA MÍMICA', text:'{J1} tiene 30 segundos para que {J2} adivine una película solo con mímica.', time:30, penalty:'3 castigos a los dos si fallan' },
+  { id:'rt6', cat:'RETO', title:'ESTATUA DE SAL', text:'{J1} no puede moverse ni pestañear durante 20 segundos mientras el resto intenta hacerle reír (sin tocarle).', time:20, penalty:'2 castigos a {J1} si se mueve o se ríe' },
+  { id:'rt7', cat:'RETO', title:'PATATA CALIENTE', text:'{J1} se inventa un reto ridículo para {J2}. {J2} lo hace o se lo pasa al de su derecha sumando +1 castigo al bote (empieza en 2). Cada uno elige: hacerlo o pasarlo. Si vuelve a {J2}, ya no hay escapatoria: reto o se bebe el bote.', penalty:'El bote acumulado' },
+  { id:'rt8', cat:'RETO', title:'EL DETALLE DE LA HABITACIÓN', text:'{J1} sale de la habitación 15 segundos. El grupo cambia un objeto de sitio o una postura. Al volver, {J1} tiene que adivinar qué ha cambiado.', time:15, penalty:'3 castigos a {J1} si falla' },
+  { id:'rt9', cat:'RETO', title:'EL PARPADEO', text:'{J1} mira al grupo 10 segundos y cierra los ojos. {J2} le pregunta algo sobre la ropa o los accesorios de alguien (ej: «¿de qué color son las zapatillas de…?»).', time:10, penalty:'2 castigos a {J1} si falla' },
+  { id:'rt10', cat:'RETO', title:'EFECTO SONORO', text:'Durante las próximas 3 cartas, {J1} tiene que hacer un efecto de sonido dramático (explosión, redoble…) cada vez que alguien beba.', penalty:'2 castigos por cada olvido', rule:{ kind:'temp', rounds:3, text:'{J1}: efecto sonoro cada vez que alguien beba' } },
+  { id:'rt11', cat:'RETO', title:'ENTREVISTA DE TRABAJO', text:'Durante las próximas 2 cartas, {J1} habla como si estuviera en una entrevista de trabajo muy formal.', penalty:'2 castigos cada vez que rompa el personaje', rule:{ kind:'temp', rounds:2, text:'{J1} habla como en una entrevista de trabajo' } },
+  { id:'rt12', cat:'RETO', title:'MIRADA FIJA', text:'{J1} y {J2} se sostienen la mirada 20 segundos sin pestañear ni sonreír.', time:20, penalty:'3 castigos al que pierda' },
+  { id:'rt13', cat:'RETO', title:'EL POETA', text:'{J1} tiene 20 segundos para improvisarle a {J2} una rima de 4 versos.', time:20, penalty:'3 castigos a {J1} si no rima' },
+  { id:'rt14', cat:'RETO', title:'CÁMARA LENTA', text:'Durante la próxima carta, {J1} hace todos sus movimientos a cámara lenta extrema.', penalty:'2 castigos si se mueve a velocidad normal', rule:{ kind:'temp', rounds:1, text:'{J1} se mueve a cámara lenta' } },
+  { id:'rt15', cat:'RETO', title:'CONEXIÓN MENTAL', text:'A la de tres, {J1} y {J2} dicen una palabra cualquiera. En los siguientes intentos, cada uno dice una palabra que conecte las dos anteriores. Tienen 3 intentos para decir la misma.', penalty:'2 castigos a cada uno si no lo logran' },
+
+  // ---------- CAOS (13) ----------
+  { id:'cs1', cat:'CAOS', title:'CAMBIO TOTAL', text:'¡Todos cambiad de sitio AHORA MISMO! El último en sentarse pierde.', penalty:'3 castigos al más lento' },
+  { id:'cs2', cat:'CAOS', title:'CUENTA ATRÁS', text:'El grupo cuenta del 1 al 10 en voz alta, una persona por número y sin orden fijo. Si dos hablan a la vez, se vuelve a empezar.', time:30, penalty:'2 castigos a los que choquen' },
+  { id:'cs3', cat:'CAOS', title:'CANCIÓN EN CADENA', text:'{J1} canta el primer verso de una canción. El de su derecha sigue con el siguiente, y así en orden. Quien se trabe o no se sepa la letra, pierde.', penalty:'3 castigos al que falle' },
+  { id:'cs4', cat:'CAOS', title:'LA LETRA MALDITA', text:'La letra maldita es la «{LETRA}». Cada uno cuenta cuántas veces sale en su nombre y primer apellido. El de su izquierda bebe esa cantidad.', penalty:'Lo que diga la letra (puede ser 0)' },
+  { id:'cs5', cat:'CAOS', title:'CADENA DE PALABRAS', text:'{J1} dice una palabra. El de su derecha la repite y añade otra, y así formando una frase cada vez más larga. Quien se equivoque o dude más de 3 segundos, pierde.', penalty:'3 castigos al que falle' },
+  { id:'cs6', cat:'CAOS', title:'MANO CON MANO', text:'¡Todos juntad la mano con la de la persona de vuestra izquierda AHORA! La última pareja en hacerlo, pierde.', penalty:'2 castigos a la última pareja' },
+  { id:'cs7', cat:'CAOS', title:'RITMO EN LA MESA', text:'{J1} marca un ritmo con golpes en la mesa. Uno a uno, en sentido horario, todos lo repiten. Quien pierda el compás, pierde.', penalty:'2 castigos al que falle' },
+  { id:'cs8', cat:'CAOS', title:'CATEGORÍAS RELÁMPAGO', text:'{J1} dice una categoría (marcas de cerveza, futbolistas…). En orden, cada uno dice algo de esa categoría. Quien repita o tarde más de 3 segundos, pierde.', penalty:'3 castigos al que falle' },
+  { id:'cs9', cat:'CAOS', title:'EL SUELO ES LAVA', text:'¡El suelo es lava! Tenéis 5 segundos para subiros DE PIE encima de algo (silla, sofá, banco…). Sentado no vale. El último en estar arriba, pierde.', time:5, penalty:'3 castigos al último' },
+
+  { id:'cs10', cat:'CAOS', title:'EL PULGAR', text:'Durante las próximas 3 cartas, cuando {J1} quiera, pondrá disimuladamente el pulgar sobre la mesa. Los demás tienen que copiarle en cuanto se den cuenta. El último en hacerlo, pierde.', penalty:'2 castigos al último cada vez', rule:{ kind:'temp', rounds:3, text:'Pulgar en la mesa: si {J1} lo pone, todos le copian' } },
+  { id:'cs11', cat:'CAOS', title:'ENCADENADOS', text:'{J1} dice una palabra. En orden, cada uno dice otra que empiece por la última letra de la anterior. Quien repita, se atasque o tarde más de 3 segundos, pierde.', penalty:'3 castigos al que falle' },
+  { id:'cs12', cat:'CAOS', title:'TELÉFONO ESCACHARRADO', text:'{J1} le susurra una frase al de su derecha, y así de oreja en oreja. Al final, cada uno dice en voz alta, en orden, lo que oyó. Pierde quien más la cambió al pasarla.', penalty:'3 castigos al que más la cambió' },
+  { id:'cs13', cat:'CAOS', title:'PIEDRA, PAPEL O TIJERA EN CADENA', text:'Todos a la vez, cada uno contra el de su derecha: ¡piedra, papel o tijera! Los empates repiten.', penalty:'2 castigos a cada uno que pierda' },
+
+  // ---------- MINIJUEGOS (12) ----------
+  { id:'mj1', cat:'MINIJUEGO', title:'PAM PUM PIM', text:'{J1} empieza una ronda de Pam Pum Pim. Ya sabéis jugar.', penalty:'3 castigos al que falle' },
+  { id:'mj2', cat:'MINIJUEGO', title:'EL PEAJE 🃏', text:'Con baraja real. {J2} reparte: 4 cartas boca arriba en fila y una boca abajo en horizontal entre la 2ª y la 3ª (el peaje). {J1} dice «mayor» o «menor» que la 1ª; {J2} saca carta del mazo y la pone encima. Si acierta, pasa a la siguiente. Si falla, bebe y vuelve a empezar desde la 1ª, con las cartas que hayan quedado encima. No termina hasta acertar las 4 seguidas.', participants:'{J1} (reparte {J2})', penalty:'Fallo en la 1ª: 1 · 2ª: 2 · 3ª: 3 · 4ª: 4. Si sale la misma carta, el doble. Pasar el peaje: 1 siempre' },
+  { id:'mj3', cat:'MINIJUEGO', title:'MANOS RÁPIDAS 🃏', text:'Con baraja real. Poned un objeto en el centro de la mesa. En cada ronda se reparte una carta a cada uno y la levantáis a la vez. Si dos o más tenéis el mismo número, ¡a por el objeto! Quien lo coja gana; los otros de esa coincidencia pierden. 5 rondas (3 si sois más de 6).', participants:'TODOS', penalty:'2 castigos a quien no coja el objeto' },
+  { id:'mj4', cat:'MINIJUEGO', title:'TRES HISTORIAS', text:'{J1} cuenta 3 historias breves: 2 mentiras y 1 verdad. A la de tres, todos dicen cuál es la verdadera.', penalty:'2 castigos a cada uno que falle' },
+  { id:'mj5', cat:'MINIJUEGO', title:'BLACKJACK 🃏', text:'Con baraja real. {J1} es la banca. Una ronda de blackjack de toda la vida: cada jugador pide carta o se planta, intentando acercarse a 21 sin pasarse. Al final la banca juega su mano.', participants:'TODOS', penalty:'2 a quien pierda contra la banca · 1 a la banca por cada jugador que le gane' },
+  { id:'mj6', cat:'MINIJUEGO', title:'MAYOR O MENOR', text:'{J1} piensa un número del 1 al 20. {J2} tiene 3 intentos para adivinarlo y {J1} solo puede decir «más» o «menos». Si {J2} falla, bebe la diferencia con su último intento; si acierta, bebe {J1} 3.', penalty:'La diferencia (o 3 a {J1})' },
+  { id:'mj7', cat:'MINIJUEGO', title:'LABIA O CASTIGO', text:'El grupo propone una postura absurda (ej: «la Tierra debería ser plana»). {J1} tiene 20 segundos para defenderla. Luego el grupo vota si ha convencido.', time:20, penalty:'3 castigos a {J1} si no convence' },
+  { id:'mj9', cat:'MINIJUEGO', title:'LA BOMBA', text:'💣 La app acaba de esconder una bomba. Explotará en algún momento de los próximos minutos. Cuando la pantalla estalle, quien lo vea hincha los mofletes en silencio y el resto tiene que copiarle. El último en darse cuenta, pierde. Seguid jugando como si nada…', bomb:true, participants:'TODOS', penalty:'3 castigos al último en hinchar los mofletes' },
+  { id:'mj10', cat:'MINIJUEGO', title:'¿QUÉ PREFIERES?', text:'{J1} se inventa un «¿qué prefieres…?» con dos opciones. A la de tres, todos votan a la vez (una mano o dos dedos). Pierde el bando que quede en minoría.', penalty:'2 castigos a cada uno de la minoría (empate: nadie)' },
+  { id:'mj12', cat:'MINIJUEGO', title:'CRONÓMETRO A CIEGAS', text:'La app dice un número de segundos. Por turnos, cada uno coge el móvil, cierra los ojos, pulsa para empezar y pulsa otra vez cuando crea que han pasado. En cada ronda cae la mitad que más se aleje, hasta que quede un ganador.', mini:'crono', participants:'TODOS', penalty:'Caes en la 1ª ronda: 3 · en la 2ª: 2 · después: 1. El ganador reparte 3' },
+  { id:'mj11', cat:'MINIJUEGO', title:'LA RULETA', text:'La app gira la ruleta y elige una víctima al azar. Sin trampa ni cartón.', mini:'ruleta', participants:'TODOS', penalty:'3 castigos a la víctima' },
+  { id:'mj8', cat:'MINIJUEGO', title:'CARA O CRUZ', text:'{J1} elige cara o cruz contra {J2}. Lanzad una moneda de verdad.', penalty:'3 castigos al que pierda' },
+
+  // ---------- VOTACIÓN (33) ----------
+  { id:'vt1', cat:'VOTACION', title:'ISLA DESIERTA', text:'A la de tres, señalad a quien moriría primero en una isla desierta.', penalty:'3 castigos al más votado' },
+  { id:'vt2', cat:'VOTACION', title:'VIRGINIDAD', text:'A la de tres, señalad a quien habría perdido la virginidad el último del grupo.', penalty:'2 castigos al más votado' },
+  { id:'vt3', cat:'VOTACION', title:'LIGOTEO', text:'A la de tres, señalad a quien ligaría MENOS en una noche de fiesta.', penalty:'3 castigos al más votado' },
+  { id:'vt4', cat:'VOTACION', title:'SURVIVOR', text:'A la de tres, señalad a quien se comería cualquier cosa con tal de sobrevivir.', penalty:'2 castigos al más votado' },
+  { id:'vt5', cat:'VOTACION', title:'EL MÁS PATO', text:'A la de tres, señalad a quien tiene más papeletas de perder el móvil o las llaves esta noche.', penalty:'2 castigos al más votado' },
+  { id:'vt6', cat:'VOTACION', title:'MALA INFLUENCIA', text:'A la de tres, señalad a quien llamaríais a las 3 AM para ayudaros a esconder un cadáver.', penalty:'3 castigos al más votado' },
+  { id:'vt7', cat:'VOTACION', title:'EL DRAMÁTICO', text:'A la de tres, señalad a quien monta el drama más grande por una tontería.', penalty:'2 castigos al más votado' },
+  { id:'vt8', cat:'VOTACION', title:'SECRETO A LA TUMBA', text:'A la de tres, señalad a quien MENOS le contaríais un secreto picante.', penalty:'3 castigos al más votado' },
+  { id:'vt9', cat:'VOTACION', title:'SIN PACIENCIA', text:'A la de tres, señalad a quien peor lleva que le lleven la contraria.', penalty:'2 castigos al más votado' },
+  { id:'vt10', cat:'VOTACION', title:'LÍDER SUPREMO', text:'A la de tres, señalad a quien tomaría el mando en una emergencia.', penalty:'2 castigos al más votado' },
+  { id:'vt11', cat:'VOTACION', title:'EL MÁS TACAÑO', text:'A la de tres, señalad a quien mira la cuenta con lupa cuando salís a cenar.', penalty:'2 castigos al más votado' },
+  { id:'vt12', cat:'VOTACION', title:'MALA MEMORIA', text:'A la de tres, señalad a quien peor se acuerda de cumpleaños y nombres.', penalty:'2 castigos al más votado' },
+  { id:'vt13', cat:'VOTACION', title:'EL MÁS PICADO', text:'A la de tres, señalad a quien más se pica jugando a cualquier cosa.', penalty:'2 castigos al más votado' },
+  { id:'vt14', cat:'VOTACION', title:'HISTORIAL DE COMPRAS', text:'A la de tres, señalad a quien tiene el historial de compras por internet más raro.', penalty:'2 castigos al más votado' },
+  { id:'vt15', cat:'VOTACION', title:'PELÍCULA DE TERROR', text:'A la de tres, señalad a quien moriría primero en una peli de terror por tomar una mala decisión.', penalty:'3 castigos al más votado' },
+  { id:'vt16', cat:'VOTACION', title:'ENAMORADIZO', text:'A la de tres, señalad a quien más rápido se ilusiona con alguien nuevo.', penalty:'2 castigos al más votado' },
+  { id:'vt17', cat:'VOTACION', title:'MANOS DE MANTEQUILLA', text:'A la de tres, señalad a quien tiene más papeletas de romper algo en esta casa antes de que acabe la noche.', penalty:'2 castigos al más votado' },
+  { id:'vt18', cat:'VOTACION', title:'VIAJE INFERNAL', text:'A la de tres, señalad a la persona con la que NUNCA haríais un viaje de 10 horas en coche.', penalty:'3 castigos al más votado' },
+  { id:'vt19', cat:'VOTACION', title:'EL DESPISTADO', text:'A la de tres, señalad a quien más tarda en pillar las bromas o las reglas.', penalty:'2 castigos al más votado' },
+  { id:'vt20', cat:'VOTACION', title:'ALMA DE LA FIESTA', text:'A la de tres, señalad a la persona sin la que esta quedada sería mucho más aburrida.', penalty:'2 castigos al más votado' },
+  { id:'vt22', cat:'VOTACION', title:'EL CONGELADOR', text:'A la de tres, señalad a quien tiene más pinta de guardar un cadáver en el congelador.', penalty:'3 castigos al más votado' },
+  { id:'vt23', cat:'VOTACION', title:'FUNERAL VACÍO', text:'A la de tres, señalad a quien tendría menos gente en su funeral.', penalty:'3 castigos al más votado' },
+  { id:'vt24', cat:'VOTACION', title:'MUERTE ESTÚPIDA', text:'A la de tres, señalad a quien moriría de la forma más estúpida.', penalty:'2 castigos al más votado' },
+  { id:'vt25', cat:'VOTACION', title:'CARNE DE SECTA', text:'A la de tres, señalad a quien acabaría metido en una secta.', penalty:'2 castigos al más votado' },
+  { id:'vt26', cat:'VOTACION', title:'LOS ANDES', text:'Accidente de avión en los Andes. A la de tres, señalad a quien os comeríais primero.', penalty:'3 castigos al más votado' },
+  { id:'vt27', cat:'VOTACION', title:'MADRE EN VENTA', text:'A la de tres, señalad a quien vendería a su madre por 1.000 €.', penalty:'3 castigos al más votado' },
+  { id:'vt28', cat:'VOTACION', title:'DOCUMENTAL DE NETFLIX', text:'A la de tres, señalad a quien acabaría saliendo en un documental de crímenes de Netflix.', penalty:'2 castigos al más votado' },
+  { id:'vt29', cat:'VOTACION', title:'APOCALIPSIS ZOMBI', text:'A la de tres, señalad a quien dejaríais atrás en un apocalipsis zombi.', penalty:'3 castigos al más votado' },
+  { id:'vt30', cat:'VOTACION', title:'PLAN B', text:'A la de tres, señalad a quien se abriría un OnlyFans si se arruinara.', penalty:'3 castigos al más votado' },
+  { id:'vt31', cat:'VOTACION', title:'HIJO SECRETO', text:'A la de tres, señalad a quien tiene más pinta de tener un hijo secreto por ahí.', penalty:'2 castigos al más votado' },
+  { id:'vt32', cat:'VOTACION', title:'ANTECEDENTES', text:'A la de tres, señalad a quien acabaría en la cárcel antes de los 40.', penalty:'3 castigos al más votado' },
+  { id:'vt33', cat:'VOTACION', title:'NADIE TE BUSCA', text:'A la de tres, señalad a quien podría desaparecer una semana sin que nadie fuera a buscarle.', penalty:'3 castigos al más votado' },
+  { id:'vt21', cat:'VOTACION', title:'SIGILO', text:'A la de tres, señalad a quien creéis más capaz de cumplir sus misiones secretas sin que le pillen.', penalty:'2 castigos al más votado' },
+
+  // ---------- VIRUS (15) ----------
+  { id:'vr1', cat:'VIRUS', title:'BARRERA COMUNICATIVA', text:'{J1} no puede hablarle ni responderle directamente a {J2}.', rule:{ kind:'virus', text:'{J1} no puede hablarle a {J2}' } },
+  { id:'vr2', cat:'VIRUS', title:'IDIOMA OFICIAL', text:'Prohibido el español. Todo el grupo habla en INGLÉS.', participants:'TODOS', rule:{ kind:'virus', text:'Todos hablan en inglés' } },
+  { id:'vr3', cat:'VIRUS', title:'MODO ACENTO', text:'{J1} habla con el acento que elija {J2}. Si no se os ocurre ninguno: acento {ACENTO}.', rule:{ kind:'virus', text:'{J1} habla con el acento que eligió {J2}' } },
+  { id:'vr4', cat:'VIRUS', title:'INTERCAMBIO DE NOMBRES', text:'{J1} pasa a llamarse {J2} y viceversa. Quien les llame por su nombre real, pierde.', participants:'TODOS', rule:{ kind:'virus', text:'{J1} y {J2} se han cambiado el nombre' } },
+  { id:'vr5', cat:'VIRUS', title:'DISCURSO ATADO', text:'El grupo elige una frase. {J1} tiene que decirla antes de cada cosa que diga.', rule:{ kind:'virus', text:'{J1} dice la frase elegida antes de hablar' } },
+  { id:'vr6', cat:'VIRUS', title:'CORTANOMBRES', text:'Prohibido decir nombres propios. Solo «oye tú», «colega» o «camarada».', participants:'TODOS', rule:{ kind:'virus', text:'Prohibido decir nombres propios' } },
+  { id:'vr7', cat:'VIRUS', title:'PREGUNTAS CON PREGUNTA', text:'Si alguien le pregunta algo a {J1}, solo puede responder con otra pregunta.', rule:{ kind:'virus', text:'{J1} solo responde con preguntas' } },
+  { id:'vr8', cat:'VIRUS', title:'Y OLÉ', text:'Todo el grupo tiene que acabar cada frase con «y olé».', participants:'TODOS', rule:{ kind:'virus', text:'Todos acaban las frases con «y olé»' } },
+  { id:'vr10', cat:'VIRUS', title:'SUMISO ABSOLUTO', text:'Durante las próximas 3 cartas, {J1} no puede decirle que no a nada que le pida {J2} (dentro de lo razonable).', rule:{ kind:'temp', rounds:3, text:'{J1} no puede decirle que no a {J2}' } },
+  { id:'vr12', cat:'VIRUS', title:'PALABRA PROHIBIDA', text:'{J1} no puede decir «sí» ni «no».', rule:{ kind:'virus', text:'{J1} no puede decir «sí» ni «no»' } },
+  { id:'vr13', cat:'VIRUS', title:'GUARDAESPALDAS', text:'{J2} es el guardaespaldas de {J1}: cada vez que {J1} beba, {J2} bebe lo mismo.', rule:{ kind:'virus', text:'Cuando {J1} bebe, {J2} bebe lo mismo' } },
+  { id:'vr15', cat:'VIRUS', title:'TODOS MIENTEN', text:'Prohibido decir la verdad. Mientras dure este virus, todo el mundo miente en todo lo que diga. Sí, el Asesino también.', participants:'TODOS', penalty:'2 castigos a quien le pillen diciendo la verdad', rule:{ kind:'virus', text:'Todos mienten: prohibido decir la verdad' } },
+  { id:'vr16', cat:'VIRUS', title:'TERCERA PERSONA', text:'{J1} solo puede hablar de sí mismo en tercera persona. Nada de «yo», «me» ni «mi»: en vez de «voy a por hielo», «{J1} va a por hielo».', penalty:'2 castigos por cada «yo» que se le escape', rule:{ kind:'virus', text:'{J1} habla de sí mismo en tercera persona' } },
+  { id:'vr17', cat:'VIRUS', title:'MULETILLAS PROHIBIDAS', text:'Nadie puede decir {MULETILLAS}. A ver cuánto aguantáis.', participants:'TODOS', penalty:'2 castigos cada vez que se escape una', rule:{ kind:'virus', text:'Nadie puede decir {MULETILLAS}' } },
+  { id:'vr14', cat:'VIRUS', title:'RISA PROHIBIDA', text:'{J1} tiene prohibido reírse. Cada risa (aunque sea por la nariz) cuenta.', penalty:'2 castigos por cada risa', rule:{ kind:'virus', text:'{J1} no puede reírse' } },
+
+  // ---------- CASTIGO MÁXIMO (9) ----------
+  { id:'cm1', cat:'CASTIGO_MAXIMO', title:'AUDIO A ELECCIÓN', text:'{J1} manda un audio de WhatsApp de 5 segundos a quien elija el grupo, diciendo la frase exacta que decida el grupo.', participants:'{J1}', penalty:'Reto o acabarse la bebida' },
+  { id:'cm2', cat:'CASTIGO_MAXIMO', title:'REDES EXPUESTAS', text:'{J1} sube a sus stories una foto hecha ahora mismo, con el texto que elija el grupo.', participants:'{J1}', penalty:'Reto o acabarse la bebida' },
+  { id:'cm3', cat:'CASTIGO_MAXIMO', title:'SECRETOS AL DESCUBIERTO', text:'{J2} revisa la galería de {J1} durante 15 segundos sin que {J1} pueda quitarle el móvil.', time:15, penalty:'Reto o {J1} se acaba la bebida' },
+  { id:'cm4', cat:'CASTIGO_MAXIMO', title:'LLAMADA EN ALTAVOZ', text:'{J1} llama en altavoz a su madre, su padre o un familiar y le tiene 30 segundos al teléfono preguntándole algo absurdo sin reírse.', time:30, participants:'{J1}', penalty:'Reto o acabarse la bebida' },
+  { id:'cm5', cat:'CASTIGO_MAXIMO', title:'LLAMADA DE BROMA', text:'El grupo elige un contacto del móvil de {J1}. {J1} le llama y le tiene 20 segundos al teléfono con una excusa absurda.', time:20, participants:'{J1}', penalty:'Reto o acabarse la bebida' },
+  { id:'cm6', cat:'CASTIGO_MAXIMO', title:'FOTO DE PERFIL', text:'El grupo elige una foto y {J1} la pone de perfil en WhatsApp o Instagram (lo que elija el grupo) durante 1 hora.', participants:'{J1}', penalty:'Reto o acabarse la bebida' },
+  { id:'cm7', cat:'CASTIGO_MAXIMO', title:'BIOGRAFÍA SECUESTRADA', text:'El grupo escribe el estado de WhatsApp o la biografía de Instagram de {J1}, y se queda así UNA SEMANA.', participants:'{J1}', penalty:'Reto o acabarse la bebida' },
+  { id:'cm8', cat:'CASTIGO_MAXIMO', title:'GRUPO FAMILIAR', text:'{J1} manda al grupo de WhatsApp de su familia el mensaje que decida el grupo. Sin explicaciones después.', participants:'{J1}', penalty:'Reto o acabarse la bebida' },
+  { id:'cm9', cat:'CASTIGO_MAXIMO', title:'SERENATA', text:'{J1} se sube a una silla y canta entera la canción que elija el grupo, mirando a quien el grupo decida.', participants:'{J1}', penalty:'Reto o acabarse la bebida' }
+];
+
+// Si no hay ninguna carta disponible en una categoría (no debería pasar), se usa esta
+const SAFE_CARD = { id:'safe', cat:'CAOS', title:'CAMBIO TOTAL', text:'¡Todos cambiad de sitio AHORA MISMO! El último en sentarse pierde.', penalty:'3 castigos al más lento' };
+
+/* =====================================================================
+   3. UTILIDADES
+   ===================================================================== */
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const rnd = arr => arr[Math.floor(Math.random() * arr.length)];
+function shuffle(arr){ const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+const store = {
+  get(k){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):null; }catch(e){ return null; } },
+  set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} },
+  del(k){ try{ localStorage.removeItem(k); }catch(e){} }
+};
+
+/* Diálogos propios (alert/confirm/prompt nativos no funcionan bien en móvil ni en la página publicada) */
+const ui = {
+  _open(html){ $('modal').innerHTML = html; $('modal-back').classList.add('active'); },
+  close(){ $('modal-back').classList.remove('active'); $('modal').innerHTML=''; },
+  alert(msg, title=''){
+    return new Promise(res => {
+      this._open(`${title?`<h3>${esc(title)}</h3>`:''}<p>${msg}</p><button class="btn btn-primary" id="m-ok">Vale</button>`);
+      $('m-ok').onclick = () => { this.close(); res(); };
+    });
+  },
+  confirm(msg, yes='Sí', no='Cancelar'){
+    return new Promise(res => {
+      this._open(`<p>${msg}</p><div class="row"><button class="btn" style="flex:1" id="m-no">${esc(no)}</button><button class="btn btn-primary" style="flex:1" id="m-yes">${esc(yes)}</button></div>`);
+      $('m-no').onclick = () => { this.close(); res(false); };
+      $('m-yes').onclick = () => { this.close(); res(true); };
+    });
+  },
+  prompt(msg, placeholder=''){
+    return new Promise(res => {
+      this._open(`<p>${msg}</p><textarea class="input" id="m-in" rows="3" placeholder="${esc(placeholder)}"></textarea>
+        <div class="row"><button class="btn" style="flex:1" id="m-no">Cancelar</button><button class="btn btn-primary" style="flex:1" id="m-yes">Guardar</button></div>`);
+      setTimeout(()=>{ try{$('m-in').focus();}catch(e){} },50);
+      $('m-no').onclick = () => { this.close(); res(null); };
+      $('m-yes').onclick = () => { const v=$('m-in').value.trim(); this.close(); res(v); };
+    });
+  },
+  toast(msg){ return this.alert(msg); }
+};
+
+/* =====================================================================
+   4. ESTADO
+   ===================================================================== */
+const DEFAULT_SETTINGS = {
+  players: ['Jugador 1','Jugador 2','Jugador 3','Jugador 4'],
+  activeCategories: Object.keys(CATEGORIES),
+  mystery: true,
+  missionsPerPlayer: 3,
+  hot: false,
+  online: true,
+  customCards: []
+};
+
+function newGameState(players){
+  return {
+    active: true,
+    players: [...players],
+    round: 0,
+    current: null,
+    lastCat: null,
+    played: [],                 // ids de cartas ya salidas
+    rules: [],                  // {kind:'virus'|'temp', text, left}
+    pickCount: Object.fromEntries(players.map(p=>[p,0])),
+    roles: { killer:null, police:null, killerCaught:false, timesCaught:0 },
+    missions: {},               // nombre -> [{id,text,status:'pending'|'done'|'caught',fail}]
+    stats: { virus:0, cats:{}, accusations:0, hits:0, misses:0, kills:0, policeHits:0, policeMisses:0 },
+    log: []
+  };
+}
+
+/* =====================================================================
+   5. APLICACIÓN
+   ===================================================================== */
+class App {
+  constructor(){
+    const saved = store.get(CONFIG.STORAGE_KEY) || {};
+    this.settings = Object.assign({}, DEFAULT_SETTINGS, saved.settings || {});
+    if ((this.settings.v||1) < 2) { this.settings.missionsPerPlayer = 3; this.settings.v = 2; }  // nuevo valor por defecto
+    this.settings.activeCategories = (this.settings.activeCategories||[]).filter(k=>CATEGORIES[k]);
+    if (!this.settings.activeCategories.length) this.settings.activeCategories = Object.keys(CATEGORIES);
+    this.feedback = saved.feedback || {};
+    this.game = saved.game && saved.game.active ? saved.game : null;
+    this.screen = 'home';
+    this.prevScreen = 'home';
+    this.timer = { id:null, left:0 };
+    this.revealIdx = 0;
+    this.mini = null;
+  }
+
+  save(){ store.set(CONFIG.STORAGE_KEY, { settings:this.settings, feedback:this.feedback, game:this.game }); }
+
+  init(){
+    const q = new URLSearchParams(location.search);
+    if (q.get('r')) return this.initPlayer(q.get('r').toUpperCase(), +(q.get('b')||0));
+    if (this.game && this.game.online) this.netResume();
+    this.renderPlayers();
+    this.renderSettings();
+    $('btn-continue').style.display = this.game ? '' : 'none';
+    $('new-player').addEventListener('keydown', e => { if(e.key==='Enter'){ e.preventDefault(); this.addPlayer(); } });
+  }
+
+  /* ---------- Navegación ---------- */
+  nav(id){
+    if (id==='settings' || id==='feedback') this.prevScreen = this.screen;
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    const el = $('screen-'+id); if(!el) return;
+    el.classList.add('active');
+    this.screen = id;
+    if (id==='feedback') this.renderFeedback();
+    if (id==='settings') this.renderSettings();
+    if (id==='home') $('btn-continue').style.display = this.game ? '' : 'none';
+    if (id==='players') this.renderPlayers();
+    window.scrollTo(0,0);
+  }
+  back(){
+    const target = (this.prevScreen==='game' && this.game) ? 'game' : (this.prevScreen && this.prevScreen!=='settings' && this.prevScreen!=='feedback' ? this.prevScreen : 'home');
+    this.nav(target);
+    if (target==='game') this.renderGame();
+  }
+
+  /* ---------- Jugadores ---------- */
+  renderPlayers(){
+    const c = $('player-list'); c.innerHTML='';
+    this.settings.players.forEach((p,i)=>{
+      const row = document.createElement('div'); row.className='player-row';
+      row.innerHTML = `<span class="num">${i+1}</span><input class="input" maxlength="15" value="${esc(p)}">
+        <button class="btn btn-danger btn-icon" aria-label="Quitar">✕</button>`;
+      row.querySelector('input').addEventListener('input', e => { this.settings.players[i] = e.target.value; this.save(); });
+      row.querySelector('button').onclick = () => this.removePlayer(i);
+      c.appendChild(row);
+    });
+    $('player-count').textContent = `${this.settings.players.length} jugadores`;
+  }
+  addPlayer(){
+    const inp = $('new-player'); const name = inp.value.trim();
+    if (!name) return;
+    if (this.settings.players.length >= CONFIG.MAX_PLAYERS) return ui.alert('Máximo 12 jugadores.');
+    if (this.settings.players.some(p=>p.trim().toLowerCase()===name.toLowerCase())) return ui.alert(`Ya hay alguien llamado «${esc(name)}». Poned un apodo o la inicial del apellido.`);
+    this.settings.players.push(name); inp.value=''; this.save(); this.renderPlayers();
+  }
+  removePlayer(i){
+    this.settings.players.splice(i,1); this.save(); this.renderPlayers();
+  }
+  validatePlayers(){
+    const names = this.settings.players.map(p=>p.trim());
+    if (names.some(n=>!n)) return 'Hay algún nombre vacío.';
+    if (names.length < CONFIG.MIN_PLAYERS) return 'Hacen falta al menos 3 jugadores.';
+    if (names.length > CONFIG.MAX_PLAYERS) return 'Máximo 12 jugadores.';
+    const lower = names.map(n=>n.toLowerCase());
+    const dup = lower.find((n,i)=>lower.indexOf(n)!==i);
+    if (dup) return `El nombre «${esc(names[lower.indexOf(dup)])}» está repetido. Poned apodos distintos.`;
+    return null;
+  }
+
+  /* ---------- Empezar partida ---------- */
+  async startGame(){
+    const err = this.validatePlayers(); if (err) return ui.alert(err);
+    if (this.game && !(await ui.confirm('Hay una partida a medias. ¿Empezar una nueva y perderla?', 'Nueva partida'))) return;
+    this.settings.players = this.settings.players.map(p=>p.trim());
+    this.game = newGameState(this.settings.players);
+    if (this.settings.mystery) {
+      this.assignRoles(); this.assignMissions();
+      this.save();
+      if (this.settings.online !== false && NET.available()) {
+        const ok = await this.netHost();
+        if (ok) return;
+        await ui.alert('No he podido conectar con el servidor (¿sin internet?). Jugamos en modo un solo móvil: pasad el móvil para ver las misiones.');
+      }
+      this.revealIdx = 0; this.showReveal(); this.nav('reveal');
+    } else {
+      this.save(); this.nav('game'); this.nextCard();
+    }
+  }
+  continueGame(){
+    if (!this.game) return;
+    this.stopTimer(); this.timer.left = this.game.current?.time || 0;
+    this.nav('game');
+    if (this.game.current) this.renderGame(); else this.nextCard();
+  }
+  assignRoles(){
+    const s = shuffle(this.game.players);
+    this.game.roles.killer = s[0];
+    this.game.roles.police = s[1];          // siempre distinto al asesino
+  }
+  assignMissions(){
+    const n = this.settings.missionsPerPlayer;
+    let deck = shuffle(MISSIONS);
+    this.game.players.forEach(p=>{
+      const mine = [];
+      while (mine.length < n) {
+        if (!deck.length) deck = shuffle(MISSIONS);
+        const m = deck.pop();
+        if (mine.some(x=>x.id===m.id)) { if (deck.length===0 && mine.length) deck = shuffle(MISSIONS); continue; }
+        mine.push(this.buildMission(m));
+      }
+      this.game.missions[p] = mine;
+    });
+  }
+  buildMission(m){
+    let text = m.text;
+    if (m.dynamic==='cult') text = text.replace('{W}', shuffle(CULT_WORDS).slice(0,5).join(', '));
+    if (m.dynamic==='trap') text = text.replace('{W}', shuffle(TRAP_WORDS).slice(0,2).join(' y '));
+    return { id:m.id, text, fail:m.fail, status:'pending' };
+  }
+
+  /* ---------- Revelación ---------- */
+  showReveal(){
+    const p = this.game.players[this.revealIdx];
+    $('reveal-name').textContent = p;
+    $('reveal-progress').textContent = `${this.revealIdx+1}/${this.game.players.length}`;
+    $('reveal-hidden').style.display='flex';
+    $('reveal-content').style.display='none'; $('reveal-content').innerHTML='';
+    $('btn-reveal-next').style.display='none';
+  }
+  revealShow(){
+    const p = this.game.players[this.revealIdx];
+    $('reveal-content').innerHTML = this.privateHTML(p, false);
+    $('reveal-hidden').style.display='none';
+    $('reveal-content').style.display='flex';
+    $('btn-reveal-next').style.display='';
+    $('btn-reveal-next').textContent = this.revealIdx === this.game.players.length-1 ? 'OCULTAR Y EMPEZAR ➔' : 'OCULTAR Y PASAR ➔';
+  }
+  revealNext(){
+    this.revealIdx++;
+    if (this.revealIdx < this.game.players.length) { this.showReveal(); window.scrollTo(0,0); }
+    else { this.nav('game'); this.nextCard(); }
+  }
+  roleHTML(p){
+    const r = this.game.roles;
+    if (p===r.killer) return `<div class="role-box">🔪 <b>ERES EL ASESINO</b><br>Guiña el ojo a alguien sin que te vea el Policía. Tu víctima espera unos segundos, dice «¡me han matado!» (sin decir quién) y bebe ${CONFIG.PEN_KILL}. Cada vez que te cacen (el Policía o una víctima con doble guiño), bebes ${CONFIG.PEN_KILLER_CAUGHT}, pero puedes seguir matando.</div>`;
+    if (p===r.police) return `<div class="role-box">👮 <b>ERES EL POLICÍA</b><br>Si ves al Asesino guiñar un ojo, grita «¡ALTO!» y pulsa el botón de ¡Alto! (en tu móvil, o en 🔪 Guiños del móvil principal). Si aciertas, bebe ${CONFIG.PEN_KILLER_CAUGHT}. Si pillas a un impostor, se acaba su bebida. Si acusas a un inocente, bebes ${CONFIG.PEN_POLICE_FAIL}.</div>`;
+    return `<div class="role-box">🙂 <b>Sin rol especial</b><br>Ni Asesino ni Policía. Solo tus misiones… y cuidado con los guiños. Si guiñas haciéndote pasar por el Asesino y te pilla el Policía, te acabas la bebida.</div>`;
+  }
+  privateHTML(p, interactive){
+    const ms = this.game.missions[p] || [];
+    const list = ms.map((m,i)=>{
+      const cls = m.status==='done'?'done':(m.status==='caught'?'caught':'');
+      let btn = '';
+      if (interactive) {
+        const pi = this.game.players.indexOf(p);
+        if (m.status==='pending') btn = `<button class="btn btn-ok btn-sm" onclick="app.markMission(${pi},${i})">✅ La he cumplido</button>`;
+        else if (m.status==='done') btn = `<div class="row" style="justify-content:space-between"><span class="small" style="color:#6ee7b7">✅ Cumplida</span><button class="btn btn-sm" onclick="app.unmarkMission(${pi},${i})">Deshacer</button></div>`;
+        else btn = `<span class="small" style="color:#fca5a5">🚨 Te pillaron: anulada</span>`;
+      } else if (m.status!=='pending') btn = `<span class="small">${m.status==='done'?'✅ Cumplida':'🚨 Pillada'}</span>`;
+      return `<div class="mission ${cls}"><div><b>Misión ${i+1}.</b> ${esc(m.text)}</div>${btn}</div>`;
+    }).join('');
+    return `${this.roleHTML(p)}
+      <div class="small muted" style="text-align:left">Tus misiones secretas (anomalías). Cúmplelas durante la partida sin que nadie te pille gritando «¡ESO HA SIDO UNA ANOMALÍA!».</div>
+      ${list}`;
+  }
+
+  /* ---------- Bucle de cartas ---------- */
+  nextCard(){
+    if (!this.game) return this.nav('home');
+    this.stopTimer();
+    this.mini = null;
+    const g = this.game;
+    // envejecer reglas temporales (cuentan las cartas que pasan)
+    g.rules.forEach(r=>{ if (r.kind==='temp') r.left--; });
+    g.rules = g.rules.filter(r=>r.kind!=='temp' || r.left>0);
+
+    g.round++;
+    const cat = this.pickCategory();
+    const card = this.buildCard(cat);
+    g.current = card;
+    g.lastCat = cat;
+    this.timer.left = card.time || 0;
+    if (!g.played.includes(card.id)) g.played.push(card.id);
+    g.stats.cats[cat] = (g.stats.cats[cat]||0)+1;
+
+    if (card.rule) {
+      if (card.rule.kind==='virus') {
+        g.rules.push({ kind:'virus', text:card.rule.text });
+        g.stats.virus++;
+        const v = g.rules.filter(r=>r.kind==='virus');
+        if (v.length > CONFIG.MAX_VIRUS) { const oldest = v[0]; g.rules.splice(g.rules.indexOf(oldest),1); }
+      } else {
+        g.rules.push({ kind:'temp', text:card.rule.text, left:card.rule.rounds });
+      }
+    }
+    if (card.bomb) this.armBomb();
+    this.save();
+    this.renderGame(true);
+  }
+
+  /* ---------- La bomba (se oculta y explota sola entre 40 s y 3 min) ---------- */
+  armBomb(){
+    clearTimeout(this.bombId);
+    const ms = (40 + Math.random()*140) * 1000;
+    this.bombId = setTimeout(()=>this.explodeBomb(), ms);
+  }
+  explodeBomb(){
+    this.bombId = null;
+    if (!this.game) return;
+    try{ navigator.vibrate && navigator.vibrate([400,100,400]); }catch(e){}
+    $('bomb').classList.add('active');
+  }
+  closeBomb(){ $('bomb').classList.remove('active'); }
+
+  pool(){
+    const all = [...CARDS, ...this.settings.customCards];
+    return all.filter(c => this.settings.hot || !c.hot);
+  }
+  pickCategory(){
+    const g = this.game;
+    const pool = this.pool();
+    let cats = this.settings.activeCategories.filter(k => pool.some(c=>c.cat===k));
+    if (!cats.length) cats = ['CAOS'];
+    // Prioridad 1: que no se repita ninguna carta. Prioridad 2: no repetir categoría seguida.
+    const fresh = cats.filter(k => pool.some(c=>c.cat===k && !g.played.includes(c.id)));
+    if (!fresh.length) {
+      // se han jugado TODAS las cartas: se vuelve a barajar el mazo entero (menos la carta actual)
+      g.played = g.current ? [g.current.id] : [];
+      g.deckCycles = (g.deckCycles||0) + 1;
+    }
+    let use = fresh.length ? fresh : cats;
+    if (use.length > 1 && g.lastCat) use = use.filter(k=>k!==g.lastCat);
+    const total = use.reduce((s,k)=>s+(CATEGORIES[k]?.weight||10),0);
+    let r = Math.random()*total;
+    for (const k of use){ r -= (CATEGORIES[k]?.weight||10); if (r<=0) return k; }
+    return use[use.length-1];
+  }
+  pickPlayers(n){
+    const g = this.game;
+    const chosen = [];
+    for (let i=0;i<n;i++){
+      const avail = g.players.filter(p=>!chosen.includes(p));
+      const min = Math.min(...avail.map(p=>g.pickCount[p]||0));
+      const p = rnd(avail.filter(x=>(g.pickCount[x]||0)===min));
+      chosen.push(p);
+    }
+    chosen.forEach(p=>g.pickCount[p]=(g.pickCount[p]||0)+1);
+    return chosen;
+  }
+  buildCard(cat){
+    const g = this.game;
+    const inCat = this.pool().filter(c=>c.cat===cat);
+    let avail = inCat.filter(c=>!g.played.includes(c.id));
+    if (!avail.length && inCat.length) {
+      // categoría agotada: se baraja de nuevo SOLO esa categoría
+      g.played = g.played.filter(id=>!inCat.some(c=>c.id===id));
+      avail = inCat.filter(c=>c.id!==g.current?.id);
+      if (!avail.length) avail = inCat;
+    }
+    const raw = avail.length ? rnd(avail) : SAFE_CARD;
+    const blob = raw.text + (raw.penalty||'') + (raw.rule?.text||'') + (raw.participants||'');
+    const needs = blob.includes('{J2}') ? 2 : (blob.includes('{J1}') ? 1 : 0);
+    const [j1,j2] = needs ? this.pickPlayers(needs) : [];
+    const accent = rnd(ACCENTS), letter = rnd(LETTERS);
+    const fillers = shuffle(FILLERS).slice(0,2).map(w=>`«${w}»`).join(' ni ');
+    const fill = s => String(s||'').replace(/\{MULETILLAS\}/g,fillers).replace(/\{J1\}/g,j1||'').replace(/\{J2\}/g,j2||'').replace(/\{ACENTO\}/g,accent).replace(/\{LETRA\}/g,letter);
+    let part = raw.participants ? fill(raw.participants) : (needs===2 ? `${j1} + ${j2}` : needs===1 ? j1 : 'TODOS');
+    let pen = raw.penalty ? fill(raw.penalty) : (raw.rule ? 'Incumplirla: 2 castigos' : '2 castigos');
+    return {
+      id: raw.id, cat, title: raw.title, text: fill(raw.text), rawText: raw.text,
+      participants: part, penalty: pen, time: raw.time||null, mini: raw.mini||null,
+      j1, j2, rule: raw.rule ? { kind: raw.rule.kind, rounds: raw.rule.rounds, text: fill(raw.rule.text) } : null,
+      hot: !!raw.hot
+    };
+  }
+
+  /* ---------- Render del juego ---------- */
+  renderGame(animate){
+    const g = this.game; if (!g || !g.current) return;
+    const c = g.current; const cat = CATEGORIES[c.cat] || { name:c.cat, icon:'', color:'#334155' };
+    $('c-round').textContent = `Carta ${g.round}`;
+    $('c-badge').textContent = `${cat.icon} ${cat.name}${c.hot?' 🔥':''}`;
+    $('c-badge').style.background = cat.color;
+    $('game-card').style.borderColor = cat.color + '88';
+    $('c-title').textContent = c.title;
+    $('c-text').textContent = c.text;
+    $('c-part').textContent = c.participants;
+    $('c-pen').textContent = c.penalty;
+    if (animate){ const gc=$('game-card'); gc.style.animation='none'; void gc.offsetWidth; gc.style.animation=''; }
+
+    // temporizador
+    if (c.time){
+      $('c-timer').style.display='flex';
+      const L=this.timer.left;
+      $('c-timer-t').textContent = L>0 ? `${L}s` : '¡FIN!';
+      $('c-timer-btn').textContent = this.timer.id ? '⏸ Pausa' : (L===c.time ? '⏱ Empezar' : (L>0 ? '▶ Seguir' : '⏱ Otra vez'));
+    } else $('c-timer').style.display='none';
+
+    // minijuego interactivo
+    $('c-mini').innerHTML = '';
+    if (c.mini) this.renderMini();
+
+    // reglas activas
+    const bar = $('rules-bar'), list = $('rules-list');
+    if (!g.rules.length) bar.style.display='none';
+    else {
+      bar.style.display='block';
+      list.innerHTML = g.rules.map(r => r.kind==='virus'
+        ? `<div class="rule-item"><span class="tag tag-v">☣️ VIRUS</span><span>${esc(r.text)}</span></div>`
+        : `<div class="rule-item"><span class="tag tag-t">⏳ ${r.left} ${r.left===1?'carta':'cartas'}</span><span>${esc(r.text)}</span></div>`).join('');
+    }
+
+    // feedback
+    const fb = this.feedback[c.id];
+    $('fb-like').className = 'fb-btn' + (fb && fb.liked ? ' liked':'');
+    $('fb-dislike').className = 'fb-btn' + (fb && fb.liked===false ? ' disliked':'');
+
+    // acciones de misterio
+    $('mystery-actions').style.display = Object.keys(g.missions).length ? 'grid' : 'none';
+    const online = !!g.online;
+    $('act-1').innerHTML = online ? '<span>📱</span>Jugadores' : '<span>🔒</span>Mis misiones';
+    $('act-net').innerHTML = online ? `<span class="dot ${NET.connected?'on':'off'}"></span>` : '';
+  }
+
+  /* ---------- Temporizador ---------- */
+  toggleTimer(){
+    const c = this.game?.current; if (!c?.time) return;
+    if (this.timer.id){ this.stopTimer(); $('c-timer-btn').textContent='▶ Seguir'; return; }
+    if (this.timer.left<=0) this.timer.left = c.time;
+    $('c-timer-btn').textContent='⏸ Pausa';
+    this.timer.id = setInterval(()=>{
+      this.timer.left--;
+      $('c-timer-t').textContent = `${Math.max(0,this.timer.left)}s`;
+      if (this.timer.left<=0){
+        this.stopTimer();
+        $('c-timer-t').textContent='¡FIN!';
+        $('c-timer-btn').textContent='⏱ Otra vez';
+        try{ navigator.vibrate && navigator.vibrate([200,100,200]); }catch(e){}
+      }
+    },1000);
+  }
+  stopTimer(){ if (this.timer.id){ clearInterval(this.timer.id); } this.timer.id=null; }
+
+  /* ---------- Minijuegos interactivos ---------- */
+  renderMini(){
+    const c = this.game.current;
+    if (!this.mini) {
+      if (c.mini==='frase'){ this.mini={ type:'frase', open:false, text:this.nextPhrase() }; return this.renderFrase(); }
+      const label = { ruleta:'🎰 Girar la ruleta', crono:'⏱️ Empezar cronómetro a ciegas' }[c.mini];
+      $('c-mini').innerHTML = `<div class="mini"><button class="btn btn-primary" onclick="app.startMini()">${label}</button></div>`;
+      return;
+    }
+    if (c.mini==='frase') this.renderFrase(); else if (c.mini==='crono') this.renderCrono(); else if (c.mini==='ruleta') this.renderRuleta();
+  }
+  // Lengua de signos: frase privada
+  nextPhrase(){
+    const g=this.game; g.usedPhrases = g.usedPhrases||[];
+    let free = PHRASES.filter(f=>!g.usedPhrases.includes(f));
+    if (!free.length){ g.usedPhrases=[]; free=PHRASES; }
+    const f = rnd(free); g.usedPhrases.push(f); this.save(); return f;
+  }
+  renderFrase(){
+    const m=this.mini, c=this.game.current;
+    $('c-mini').innerHTML = `<div class="mini" style="text-align:center">${m.open
+      ? `<div style="font-size:1.25rem;font-weight:800;color:var(--amber)">«${esc(m.text)}»</div><button class="btn" onclick="app.toggleFrase()">🙈 Ocultar</button>`
+      : `<button class="btn btn-purple" onclick="app.toggleFrase()">👁️ Ver frase (solo ${esc(c.j1)})</button>`}</div>`;
+  }
+  toggleFrase(){ this.mini.open=!this.mini.open; this.renderFrase(); }
+  // Cronómetro a ciegas
+  cronoTarget(){ return 4 + Math.floor(Math.random()*9); }   // 4–12 s
+  renderCrono(){
+    const m=this.mini; let h='<div class="mini">';
+    if (m.phase==='end'){
+      h += `<div style="text-align:center"><div style="font-size:2rem">🏆</div><b style="font-size:1.2rem">${esc(m.alive[0])} gana</b> y reparte <b>3 castigos</b>.</div>`;
+      m.out.forEach(o=>{ h+=`<div class="result-line">${esc(o.p)} cayó en la ronda ${o.r} → <b style="color:#fca5a5">${o.r===1?3:o.r===2?2:1}</b></div>`; });
+    } else if (m.phase==='roundEnd'){
+      h += `<b>Resultado ronda ${m.round} (objetivo ${m.target} s)</b>`;
+      m.results.slice().sort((a,b)=>a.d-b.d).forEach(r=>{ const o=m.lastOut.includes(r.p);
+        h+=`<div class="deal-item ${o?'match':''}"><span>${o?'❌ ':''}${esc(r.p)}</span><b>${r.t.toFixed(2)} s <span class="muted small">(${r.d.toFixed(2)})</span></b></div>`; });
+      h += `<button class="btn btn-primary" onclick="app.cronoNextRound()">${m.alive.length>1?'Siguiente ronda ➔':'Ver resultado final 🏆'}</button>`;
+    } else {
+      const p=m.alive[m.turn];
+      h += `<div class="row" style="justify-content:space-between"><b>Ronda ${m.round}</b><span class="muted small">${m.turn+1}/${m.alive.length}</span></div>
+        <div style="text-align:center">Objetivo: <b style="font-size:1.6rem;color:var(--amber)">${m.target} s</b></div>
+        <div style="text-align:center">Turno de <b style="font-size:1.2rem">${esc(p)}</b></div>`;
+      h += m.running
+        ? `<button class="btn btn-danger" style="height:170px;font-size:1.5rem" onclick="app.cronoTap()">⏹ PARAR</button>`
+        : (m.last ? `<div style="text-align:center">${esc(m.last.p)}: <b>${m.last.t.toFixed(2)} s</b></div>` : '') +
+          `<button class="btn btn-primary" style="height:170px;font-size:1.4rem" onclick="app.cronoTap()">👁️‍🗨️ Cierra los ojos y pulsa</button>`;
+    }
+    $('c-mini').innerHTML = h+'</div>';
+  }
+  cronoTap(){
+    const m=this.mini;
+    if (!m.running){ m.running=true; m.t0=performance.now(); m.last=null; return this.renderCrono(); }
+    const t=(performance.now()-m.t0)/1000; const p=m.alive[m.turn];
+    m.running=false; m.results.push({ p, t, d:Math.abs(t-m.target) }); m.last={p,t};
+    m.turn++;
+    if (m.turn>=m.alive.length){
+      const n=m.alive.length, k=Math.max(1, Math.floor(n/2));
+      const out=m.results.slice().sort((a,b)=>b.d-a.d).slice(0,k).map(r=>r.p);
+      m.lastOut=out; out.forEach(p=>m.out.push({p, r:m.round}));
+      m.alive=m.alive.filter(p=>!out.includes(p)); m.phase='roundEnd';
+    }
+    this.renderCrono();
+  }
+  cronoNextRound(){
+    const m=this.mini;
+    if (m.alive.length<=1){ m.phase='end'; return this.renderCrono(); }
+    m.round++; m.target=this.cronoTarget(); m.turn=0; m.results=[]; m.last=null; m.phase='play'; this.renderCrono();
+  }
+  renderRuleta(){
+    const m=this.mini;
+    $('c-mini').innerHTML = `<div class="mini" style="text-align:center"><div style="font-size:2rem;font-weight:800;color:${m.done?'#fca5a5':'var(--amber)'}">${m.done?'💀 ':''}${esc(m.shown)}</div>
+      ${m.done?`<div><b>${esc(m.shown)}</b> bebe <b style="color:#fca5a5">3 castigos</b>.</div>`:'<div class="muted small">Girando…</div>'}</div>`;
+  }
+  spinRuleta(){
+    const m=this.mini; const ps=this.game.players; const victim=rnd(ps);
+    let i=Math.floor(Math.random()*ps.length), step=0, steps=14+Math.floor(Math.random()*5), delay=60;
+    const tick=()=>{
+      if (this.mini!==m) return;
+      step++; i=(i+1)%ps.length; m.shown = step>=steps ? victim : ps[i];
+      if (step>=steps){ m.done=true; this.renderRuleta(); try{navigator.vibrate&&navigator.vibrate(200);}catch(e){} return; }
+      this.renderRuleta(); delay*=1.15; setTimeout(tick, delay);
+    };
+    tick();
+  }
+  startMini(){
+    const c = this.game.current;
+    if (c.mini==='ruleta'){ this.mini={ type:'ruleta', shown:'', done:false }; this.renderRuleta(); this.spinRuleta(); return; }
+    if (c.mini==='crono'){ this.mini={ type:'crono', round:1, target:this.cronoTarget(), alive:shuffle(this.game.players), turn:0, results:[], out:[], phase:'play' }; return this.renderCrono(); }
+    if (c.mini==='blackjack'){
+      const bank = c.j1 || rnd(this.game.players);
+      const order = this.game.players.filter(p=>p!==bank);
+      const deck = shuffle(['♠','♥','♦','♣'].flatMap(s=>['A','2','3','4','5','6','7','8','9','10','J','Q','K'].map(v=>({v,s}))));
+      const hands = {}; [...order, bank].forEach(p=>hands[p]=[deck.pop(),deck.pop()]);
+      this.mini = { type:'bj', bank, order, deck, hands, turn:0, done:false };
+      this.bjAutoSkip();
+    } else {
+      const rounds = this.game.players.length > 6 ? 3 : 5;
+      this.mini = { type:'manos', round:0, rounds, deal:null };
+      this.manosDeal();
+    }
+    this.renderMini();
+  }
+  // Blackjack
+  bjValue(hand){ let t=0, a=0; hand.forEach(c=>{ if(c.v==='A'){t+=11;a++;} else if(['J','Q','K'].includes(c.v)) t+=10; else t+=+c.v; }); while(t>21&&a){t-=10;a--;} return t; }
+  bjCards(hand){ return `<div class="cards-row">${hand.map(c=>`<span class="pcard ${c.s==='♥'||c.s==='♦'?'red':''}">${c.v}${c.s}</span>`).join('')}</div>`; }
+  bjAutoSkip(){ const m=this.mini; while(m.turn<m.order.length && this.bjValue(m.hands[m.order[m.turn]])>=21) m.turn++; if(m.turn>=m.order.length) this.bjBank(); }
+  bjHit(){ const m=this.mini; const p=m.order[m.turn]; m.hands[p].push(m.deck.pop()); if(this.bjValue(m.hands[p])>=21){ m.turn++; this.bjAutoSkip(); } this.renderMini(); }
+  bjStand(){ const m=this.mini; m.turn++; this.bjAutoSkip(); this.renderMini(); }
+  bjBank(){ const m=this.mini; const h=m.hands[m.bank]; while(this.bjValue(h)<17) h.push(m.deck.pop()); m.done=true; }
+  renderBlackjack(){
+    const m=this.mini; let html='<div class="mini">';
+    if (!m.done){
+      const p = m.order[m.turn]; const v=this.bjValue(m.hands[p]);
+      html += `<div class="small muted">Banca: <b>${esc(m.bank)}</b> · enseña: ${this.bjCards([m.hands[m.bank][0]])}</div>
+        <div><b style="font-size:1.1rem">Turno de ${esc(p)}</b> <span class="muted small">(${m.turn+1}/${m.order.length})</span></div>
+        ${this.bjCards(m.hands[p])}<div>Total: <b>${v}</b></div>
+        <div class="row"><button class="btn btn-primary" style="flex:1" onclick="app.bjHit()">Pedir</button><button class="btn" style="flex:1" onclick="app.bjStand()">Plantarse</button></div>`;
+    } else {
+      const bv=this.bjValue(m.hands[m.bank]); const bBust=bv>21; let bankPays=0;
+      html += `<div><b>Banca (${esc(m.bank)}): ${bv}${bBust?' 💥 se pasa':''}</b></div>${this.bjCards(m.hands[m.bank])}`;
+      m.order.forEach(p=>{
+        const v=this.bjValue(m.hands[p]); let res;
+        if (v>21) res=`se pasa → <b style="color:#fca5a5">2 castigos</b>`;
+        else if (bBust || v>bv){ res=`gana a la banca ✅`; bankPays++; }
+        else if (v===bv) res='empate, nadie bebe';
+        else res=`pierde → <b style="color:#fca5a5">2 castigos</b>`;
+        html += `<div class="result-line">${esc(p)} (${v}): ${res}</div>`;
+      });
+      html += `<div style="margin-top:4px"><b>${esc(m.bank)}</b> (banca) bebe <b style="color:#fca5a5">${bankPays}</b> ${bankPays===1?'castigo':'castigos'}.</div>`;
+    }
+    $('c-mini').innerHTML = html+'</div>';
+  }
+  // Manos rápidas (baraja española)
+  manosDeal(){
+    const m=this.mini; m.round++;
+    const suits=['🪙 oros','🍷 copas','⚔️ espadas','🪵 bastos'];
+    const vals=[1,2,3,4,5,6,7,10,11,12];
+    const names={1:'As',10:'Sota',11:'Caballo',12:'Rey'};
+    const deck=shuffle(suits.flatMap(s=>vals.map(v=>({v,s}))));
+    m.deal = this.game.players.map(p=>({p, c:deck.pop()}));
+    m.names = names;
+  }
+  renderManos(){
+    const m=this.mini; const counts={};
+    m.deal.forEach(d=>counts[d.c.v]=(counts[d.c.v]||0)+1);
+    const matched = m.deal.filter(d=>counts[d.c.v]>1);
+    let html=`<div class="mini"><div class="row" style="justify-content:space-between"><b>Ronda ${m.round}/${m.rounds}</b>
+      <span class="small ${matched.length?'':'muted'}">${matched.length?'⚡ ¡COINCIDENCIA! ¡A por el objeto!':'Nadie coincide'}</span></div><div class="deal-list">`;
+    m.deal.forEach(d=>{ const n=m.names[d.c.v]||d.c.v; html+=`<div class="deal-item ${counts[d.c.v]>1?'match':''}"><span>${esc(d.p)}</span><b>${n} de ${d.c.s.split(' ')[1]} ${d.c.s.split(' ')[0]}</b></div>`; });
+    html+='</div>';
+    html+= m.round<m.rounds ? `<button class="btn btn-primary" onclick="app.manosNext()">Siguiente ronda ➔</button>` : `<div class="small muted" style="text-align:center">Fin de manos rápidas. ¡Pasad a la siguiente carta!</div>`;
+    $('c-mini').innerHTML = html+'</div>';
+  }
+  manosNext(){ if(this.mini.round<this.mini.rounds){ this.manosDeal(); this.renderMini(); } }
+
+  /* ---------- Misiones durante la partida ---------- */
+  pickPlayerOverlay(title, subtitle, players, onPick, extra=''){
+    $('overlay-inner').innerHTML = `<h2>${title}</h2><p class="muted small">${subtitle}</p>
+      <div class="pick-list">${players.map((p,i)=>`<button class="btn btn-block" data-i="${i}">${esc(p)}</button>`).join('')}</div>
+      ${extra}<button class="btn btn-danger" onclick="app.closeOverlay()">Cancelar</button>`;
+    $('overlay-inner').querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>onPick(players[+b.dataset.i]));
+    $('overlay').classList.add('active');
+  }
+  gateOverlay(p, msg, onShow){
+    $('overlay-inner').innerHTML = `<div style="text-align:center" class="stack">
+      <p class="muted small">Pasa el móvil a:</p><h1 style="color:var(--cyan);font-size:2rem">${esc(p)}</h1>
+      <p class="muted">${msg}</p>
+      <button class="btn btn-purple" id="gate-ok">👁️ Soy ${esc(p)}, ver</button>
+      <button class="btn btn-danger" onclick="app.closeOverlay()">Cancelar</button></div>`;
+    $('gate-ok').onclick = onShow;
+    $('overlay').classList.add('active');
+  }
+  closeOverlay(){ $('overlay').classList.remove('active'); $('overlay-inner').innerHTML=''; this._lobbyOpen=false; this._viewMode=null; this._accOpen=false; if (this.screen==='game') this.renderGame(); if (this.screen==='me') this.renderMe(); }
+
+  openMyMissions(){
+    this.pickPlayerOverlay('🔒 MIS MISIONES','¿Quién quiere mirar sus misiones?', this.game.players, p=>{
+      this.gateOverlay(p, 'Que nadie más mire la pantalla 👀', ()=>this.showMyMissions(p));
+    });
+  }
+  showMyMissions(p){
+    $('overlay-inner').innerHTML = `<h2 style="text-align:center">${esc(p)}</h2>${this.privateHTML(p,true)}
+      <button class="btn btn-primary" onclick="app.closeOverlay()">🙈 Ocultar y devolver</button>`;
+    this._viewing = p;
+  }
+  markMission(pi,i){ const p=this.game.players[pi]; const m=this.game.missions[p]?.[i]; if(m&&m.status==='pending'){ m.status='done'; this.save(); this.netPushState(p); this.showMyMissions(p);} }
+  unmarkMission(pi,i){ const p=this.game.players[pi]; const m=this.game.missions[p]?.[i]; if(m&&m.status==='done'){ m.status='pending'; this.save(); this.netPushState(p); this.showMyMissions(p);} }
+
+  /* ---------- ¡ESO HA SIDO UNA ANOMALÍA! ---------- */
+  openAccuse(){
+    const g=this.game;
+    this.pickPlayerOverlay('🚨 ¡ANOMALÍA!','¿Quién acusa?', g.players, accuser=>{
+      this.pickPlayerOverlay('🚨 ¡ANOMALÍA!',`${esc(accuser)} acusa a…`, g.players.filter(p=>p!==accuser), accused=>{
+        if (g.online) return this.netAccuse(accuser, accused);
+        this.gateOverlay(accused, `<b>${esc(accuser)}</b> dice que lo que acabas de hacer era una misión secreta. Sé honrado 😇`, ()=>this.accusedAnswer(accuser, accused));
+      });
+    });
+  }
+  accusedAnswer(accuser, accused){
+    const ms = (this.game.missions[accused]||[]).map((m,i)=>({m,i})).filter(x=>x.m.status==='pending');
+    $('overlay-inner').innerHTML = `<h2>${esc(accused)}, ¿te han pillado?</h2>
+      <p class="muted small">Si lo que hacías era una de estas misiones, tócala. Si no, eres inocente.</p>
+      <div class="pick-list">${ms.map(x=>`<button class="btn btn-block" style="text-align:left;justify-content:flex-start" data-i="${x.i}">🎯 ${esc(x.m.text)}</button>`).join('')}</div>
+      <button class="btn btn-ok" id="acc-no">😇 No, soy inocente</button>`;
+    $('overlay-inner').querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>this.accuseResult(accuser, accused, +b.dataset.i));
+    $('acc-no').onclick = ()=>this.accuseResult(accuser, accused, -1);
+  }
+  accuseResult(accuser, accused, idx){
+    const g=this.game; g.stats.accusations++;
+    let html;
+    if (idx>=0){
+      g.missions[accused][idx].status='caught'; g.stats.hits++;
+      g.log.push(`${accuser} pilló a ${accused}`);
+      html = `<div style="font-size:3rem">🚨</div><h2>¡PILLADO!</h2><p><b>${esc(accused)}</b> estaba haciendo una misión.</p>
+        <p style="font-size:1.2rem"><b>${esc(accused)}</b> bebe <b style="color:#fca5a5">${CONFIG.PEN_CAUGHT} castigos</b> y esa misión queda anulada.</p>`;
+    } else {
+      g.stats.misses++;
+      g.log.push(`${accuser} acusó en falso a ${accused}`);
+      html = `<div style="font-size:3rem">🤡</div><h2>¡INOCENTE!</h2><p><b>${esc(accused)}</b> no estaba haciendo ninguna misión.</p>
+        <p style="font-size:1.2rem"><b>${esc(accuser)}</b> bebe <b style="color:#fca5a5">${CONFIG.PEN_FALSE_ACCUSE} castigos</b> por paranoico.</p>`;
+    }
+    this.save();
+    if (g.online){
+      this.netPushState(accused);
+      const id=NET.uid(); g.online.seen.push(id);
+      NET.pub('evt', { type:'acc', id, from:accuser, to:accused, hit:idx>=0, origin:NET.cid });
+    }
+    $('overlay-inner').innerHTML = `<div style="text-align:center" class="stack">${html}<button class="btn btn-primary" onclick="app.closeOverlay()">Seguir jugando</button></div>`;
+  }
+
+  /* ---------- 👮 ¡ALTO! ---------- */
+  openWink(){
+    $('overlay-inner').innerHTML = `<h2>🔪 GUIÑOS</h2>
+      <button class="btn btn-block" style="padding:18px" onclick="app.openPolice()">👮 Soy el Policía: ¡ALTO!</button>
+      <button class="btn btn-block" style="padding:18px" onclick="app.openDouble()">😵 ¡Doble guiño! Me han guiñado dos personas</button>
+      <p class="small muted">Doble guiño: si señalas al Asesino de verdad, le cazas (bebe ${CONFIG.PEN_KILLER_CAUGHT}) y el otro se acaba la bebida por impostor. Si fallas, bebes ${CONFIG.PEN_DOUBLE_FAIL}. Si no quieres arriesgar, bebe tus ${CONFIG.PEN_KILL} y calla.</p>
+      <button class="btn btn-danger" onclick="app.closeOverlay()">Cancelar</button>`;
+    $('overlay').classList.add('active');
+  }
+  openDouble(){
+    const g=this.game;
+    this.pickPlayerOverlay('😵 ¡DOBLE GUIÑO!','¿Quién es la víctima?', g.players, vic=>{
+      const rest=g.players.filter(p=>p!==vic);
+      this.pickPlayerOverlay('😵 ¡DOBLE GUIÑO!',`${esc(vic)}, ¿quién te ha guiñado PRIMERO?`, rest, a=>{
+        this.pickPlayerOverlay('😵 ¡DOBLE GUIÑO!',`¿Y quién te ha guiñado DESPUÉS?`, rest.filter(p=>p!==a), b=>{
+          this.pickPlayerOverlay('😵 ¡DOBLE GUIÑO!',`Momento de la verdad, ${esc(vic)}: ¿cuál de los dos es el Asesino?`, [a,b], pick=>{
+            const other = pick===a ? b : a;
+            if (pick===g.roles.killer){
+              g.roles.killerCaught=true; g.roles.timesCaught=(g.roles.timesCaught||0)+1; g.stats.doubleHits=(g.stats.doubleHits||0)+1; g.stats.impostors=(g.stats.impostors||0)+1;
+              this.resultOverlay('🎯','¡ASESINO CAZADO!', `<p><b>${esc(pick)}</b> era el Asesino de verdad: bebe <b style="color:#fca5a5">${CONFIG.PEN_KILLER_CAUGHT} castigos</b>. Puede seguir matando… con mucho más cuidado 😏</p>
+                <p><b>${esc(other)}</b> era un impostor: <b style="color:#fca5a5">se acaba la bebida</b>.</p><p class="small muted">${esc(vic)} se libra de beber.</p>`);
+            } else {
+              this.resultOverlay('💀','¡HAS FALLADO!', `<p><b>${esc(pick)}</b> no es el Asesino.</p>
+                <p style="font-size:1.2rem"><b>${esc(vic)}</b> bebe <b style="color:#fca5a5">${CONFIG.PEN_DOUBLE_FAIL} castigos</b>. Haber bebido tus ${CONFIG.PEN_KILL} y callado 🤷</p>`);
+            }
+          });
+        });
+      });
+    });
+  }
+  resultOverlay(icon, title, body, silent){
+    this.save();
+    if (!silent && this.game && this.game.online) NET.pub('evt', { type:'msg', icon, title, text: body.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim(), origin:NET.cid, id:NET.uid() });
+    $('overlay-inner').innerHTML = `<div style="text-align:center" class="stack"><div style="font-size:3rem">${icon}</div><h2>${title}</h2>${body}
+      <button class="btn btn-primary" onclick="app.closeOverlay()">Seguir jugando</button></div>`;
+  }
+  impostorCaught(imp, by){
+    this.game.stats.impostors = (this.game.stats.impostors||0)+1;
+    this.resultOverlay('🎭','¡ASESINO FALSO!', `<p><b>${esc(imp)}</b> no es el Asesino: estaba guiñando para hacerse pasar por él.</p>
+      <p style="font-size:1.2rem"><b>${esc(imp)}</b> se acaba <b style="color:#fca5a5">la bebida entera</b>.</p>
+      <p class="small muted">Pillado por ${esc(by)}, el Policía.</p>`);
+  }
+  openPolice(){
+    const g=this.game;
+    this.pickPlayerOverlay('👮 ¡ALTO!','¿Quién es el Policía que grita «¡ALTO!»?', g.players, cop=>{
+      if (cop!==g.roles.police){
+        return this.resultOverlay('🕵️','¡POLICÍA FALSO!', `<p><b>${esc(cop)}</b> no es el Policía. Por hacerse pasar por la ley: <b style="color:#fca5a5">${CONFIG.PEN_POLICE_FAIL} castigos</b>.</p>`);
+      }
+      this.pickPlayerOverlay('👮 ¡ALTO!',`${esc(cop)}, ¿a quién has visto guiñar el ojo?`, g.players.filter(p=>p!==cop), sus=>{
+        if (sus===g.roles.killer){
+          g.roles.killerCaught=true; g.roles.timesCaught=(g.roles.timesCaught||0)+1; g.stats.policeHits++;
+          return this.resultOverlay('🔪','¡ASESINO CAZADO!', `<p><b>${esc(sus)}</b> era el Asesino de verdad.</p>
+            <p style="font-size:1.2rem"><b>${esc(sus)}</b> bebe <b style="color:#fca5a5">${CONFIG.PEN_KILLER_CAUGHT} castigos</b>. Puede seguir matando… pero cada vez que le cacen, otros ${CONFIG.PEN_KILLER_CAUGHT} 😏</p>`);
+        }
+        // no es el Asesino (o ya estaba cazado): ¿guiñaba de verdad? → impostor
+        $('overlay-inner').innerHTML = `<div style="text-align:center" class="stack"><div style="font-size:3rem">🤨</div>
+          <h2>${esc(sus)} NO es el Asesino</h2>
+          <p>¿Le habéis pillado guiñando el ojo de verdad? Que lo confirme la víctima.</p>
+          <button class="btn btn-danger" id="w-yes">🎭 Sí, guiñó: es un impostor</button>
+          <button class="btn" id="w-no">🤦 No, me he equivocado</button></div>`;
+        $('w-yes').onclick = ()=>this.impostorCaught(sus, cop);
+        $('w-no').onclick = ()=>{ g.stats.policeMisses++;
+          this.resultOverlay('🤦','¡INOCENTE!', `<p><b>${esc(sus)}</b> no ha hecho nada.</p>
+            <p style="font-size:1.2rem"><b>${esc(cop)}</b> bebe <b style="color:#fca5a5">${CONFIG.PEN_POLICE_FAIL} castigos</b>. Y ahora todos saben quién es el Policía 👀</p>`); };
+      });
+    });
+  }
+  /* ---------- Reglas ---------- */
+  openRules(){
+    $('overlay-inner').innerHTML = `<div class="rules-doc">
+      <h2 class="title-grad" style="font-size:1.5rem">📜 REGLAS DE ANOMALÍA</h2>
+      <h3>Cómo se juega</h3>
+      <ul><li>Sale una carta, la hacéis y pulsáis <b>Siguiente carta</b>. Así hasta que queráis. No hay final fijo ni eliminados.</li>
+      <li>Una <b>carta = una ronda</b>. Cuando algo dice «las próximas 3 cartas», cuenta las 3 siguientes.</li>
+      <li>Ninguna carta se repite hasta que han salido todas. Entonces el mazo entero se vuelve a barajar.</li>
+      <li><b>1 castigo = 1 trago</b> (o lo que acordéis). En cartas como La letra maldita o Mayor o menor puede tocar 0 o 1: se bebe lo que toque.</li></ul>
+      <h3>☣️ Virus y ⏳ reglas temporales</h3>
+      <ul><li>Se quedan arriba en <b>Reglas activas</b> para que nadie las olvide.</li>
+      <li><b>Virus:</b> máximo ${CONFIG.MAX_VIRUS} a la vez. Cuando entra uno nuevo y ya hay ${CONFIG.MAX_VIRUS}, se va el más antiguo.</li>
+      <li><b>Temporales:</b> muestran cuántas cartas les quedan y desaparecen solas.</li>
+      <li>Quien incumpla una regla activa: <b>2 castigos</b> cada vez (salvo que la carta diga otra cosa).</li></ul>
+      <h3>💥 Castigo máximo</h3>
+      <ul><li>O haces el reto, o te acabas la bebida entera. Tú eliges.</li></ul>
+      <h3>🕵️ Misiones secretas (anomalías)</h3>
+      <ul><li>Al empezar, cada jugador recibe ${this.settings.missionsPerPlayer} misiones secretas. Se consultan cuando quieras en <b>🔒 Mis misiones</b>.</li>
+      <li>Si jugáis cada uno con su móvil, las ves y las marcas en tu propio móvil. Si no, en <b>🔒 Mis misiones</b> del móvil principal.</li>
+      <li>Cúmplelas disimuladamente durante la partida y márcalas con <b>✅ La he cumplido</b>.</li>
+      <li>Si crees que alguien está haciendo una misión, grita <b>«¡ESO HA SIDO UNA ANOMALÍA!»</b> y pulsa <b>🚨</b> (en tu móvil o en el principal). Al acusado le salta la pregunta en su móvil y responde en privado (a la confianza):
+        <ul><li>Si era una misión: <b>el acusado bebe ${CONFIG.PEN_CAUGHT}</b> y esa misión queda anulada.</li>
+        <li>Si no lo era: <b>el que acusa bebe ${CONFIG.PEN_FALSE_ACCUSE}</b>.</li></ul></li>
+      <li>Una misión ya marcada como cumplida no se puede pillar.</li>
+      <li><b>Al final</b>, por cada misión cumplida repartes <b>${CONFIG.REWARD_MISSION} castigos</b> entre quien quieras.</li></ul>
+      <h3>🔪 Asesino y 👮 Policía</h3>
+      <ul><li>Son dos personas distintas, elegidas en secreto. Además tienen sus misiones como todos.</li>
+      <li><b>Asesino:</b> guiña el ojo a alguien sin que el Policía lo vea. La víctima espera unos segundos, dice «¡me han matado!» sin decir quién, y bebe <b>${CONFIG.PEN_KILL}</b>.</li>
+      <li>La víctima no sabe si el guiño es del Asesino o de un impostor: bebe ${CONFIG.PEN_KILL} igualmente.</li>
+      <li><b>😵 Doble guiño:</b> si a ti te guiñan <b>dos personas distintas</b>, grita «¡DOBLE GUIÑO!» y pulsa <b>🔪 Guiños</b>. Señala cuál de los dos es el Asesino:
+        <ul><li>Aciertas: el Asesino bebe <b>${CONFIG.PEN_KILLER_CAUGHT}</b>, el otro se acaba la bebida por impostor y tú no bebes.</li>
+        <li>Fallas: bebes <b>${CONFIG.PEN_DOUBLE_FAIL}</b>. Si no quieres arriesgar, bebe tus ${CONFIG.PEN_KILL} y calla.</li></ul></li>
+      <li><b>Policía:</b> si ve un guiño, grita «¡ALTO!» y pulsa <b>🔪 Guiños → Soy el Policía</b>.
+        <ul><li>Pilla al Asesino de verdad: el Asesino bebe <b>${CONFIG.PEN_KILLER_CAUGHT}</b>. Puede seguir matando, pero cada vez que le cacen vuelve a beber ${CONFIG.PEN_KILLER_CAUGHT}.</li>
+        <li>Pilla a un impostor que guiñaba: el impostor se acaba la bebida.</li>
+        <li>Acusa a alguien que no ha guiñado: el Policía bebe <b>${CONFIG.PEN_POLICE_FAIL}</b> (y queda descubierto).</li>
+        <li>Si alguien que no es el Policía dice serlo, bebe ${CONFIG.PEN_POLICE_FAIL}.</li></ul></li>
+      <li><b>🎭 Asesino falso:</b> si alguien guiña haciéndose pasar por el Asesino y le pilla el Policía, <b>se acaba la bebida entera</b>. Hacer trampas sale más caro que ser el Asesino.</li>
+      <li>El Policía también puede ser víctima del Asesino.</li></ul>
+      <h3>🗳️ Votaciones</h3>
+      <ul><li>A la de tres todos señalan a la vez. Bebe el más votado. Si hay empate, beben todos los empatados.</li></ul>
+      </div><button class="btn btn-primary" onclick="app.closeOverlay()">Entendido</button>`;
+    $('overlay').classList.add('active');
+  }
+
+  /* ---------- Feedback ---------- */
+  async rate(like){
+    const c = this.game?.current; if (!c) return;
+    let note = '';
+    if (!like){ note = await ui.prompt(`¿Qué cambiarías de «${esc(c.title)}»? (opcional)`, 'Ej: no se entiende quién bebe'); if (note===null) return; }
+    this.feedback[c.id] = { title:c.title, cat:CATEGORIES[c.cat]?.name||c.cat, rawText:c.rawText, liked:like, note };
+    this.save(); this.renderGame();
+  }
+  feedbackText(){
+    const items = Object.values(this.feedback);
+    let t = '--- INFORME DE FEEDBACK ANOMALÍA ---\n\n';
+    items.forEach(f=>{ t+=`${f.liked?'✅ ME GUSTA':'❌ REVISAR/CAMBIAR'}: [${f.cat}] "${f.title}"\nTexto original: "${f.rawText}"\n${f.note?`Comentario: ${f.note}\n`:''}\n`; });
+    return t;
+  }
+  renderFeedback(){
+    const items = Object.values(this.feedback);
+    $('fb-text').style.display='none';
+    $('fb-list').innerHTML = items.length ? items.map(f=>`<div class="fb-item"><b>${f.liked?'👍':'👎'} [${esc(f.cat)}] ${esc(f.title)}</b>
+      <p class="muted" style="margin-top:4px">"${esc(f.rawText)}"</p>${f.note?`<p style="color:var(--amber);margin-top:4px"><b>Nota:</b> ${esc(f.note)}</p>`:''}</div>`).join('')
+      : '<p class="muted" style="text-align:center;margin-top:20px">Aún no has valorado ninguna carta.</p>';
+  }
+  async copyFeedback(){
+    if (!Object.keys(this.feedback).length) return ui.alert('No hay feedback todavía.');
+    const t = this.feedbackText();
+    try { await navigator.clipboard.writeText(t); ui.alert('¡Copiado! Pégalo en el chat.'); }
+    catch(e){ const ta=$('fb-text'); ta.value=t; ta.style.display='block'; ta.focus(); ta.select(); ui.alert('No he podido copiar solo. Te lo dejo seleccionado abajo: mantén pulsado y copia.'); }
+  }
+  async clearFeedback(){ if (await ui.confirm('¿Borrar todo el feedback guardado?','Borrar')){ this.feedback={}; this.save(); this.renderFeedback(); } }
+
+  /* ---------- Ajustes ---------- */
+  renderSettings(){
+    $('set-mystery').checked = this.settings.mystery;
+    $('set-online').checked = this.settings.online !== false;
+    $('set-online').parentElement.style.display = NET.available() ? '' : 'none';
+    $('set-hot').checked = this.settings.hot;
+    $('hot-count').textContent = [...CARDS,...this.settings.customCards].filter(c=>c.hot).length;
+    document.querySelectorAll('#set-missions button').forEach(b=>b.classList.toggle('on', +b.dataset.v===this.settings.missionsPerPlayer));
+    const grid=$('set-cats'); grid.innerHTML='';
+    Object.entries(CATEGORIES).forEach(([k,c])=>{
+      const l=document.createElement('label'); l.className='check';
+      l.innerHTML=`<input type="checkbox" ${this.settings.activeCategories.includes(k)?'checked':''}> ${c.icon} ${c.name}`;
+      l.querySelector('input').onchange = e => this.toggleCat(k, e.target);
+      grid.appendChild(l);
+    });
+    const sel=$('cu-cat'); if (!sel.options.length) sel.innerHTML = Object.entries(CATEGORIES).map(([k,c])=>`<option value="${k}">${c.icon} ${c.name}</option>`).join('');
+    const cc=this.settings.customCards; $('cu-count').textContent=cc.length;
+    $('cu-list').innerHTML = cc.length ? cc.map((c,i)=>`<div class="custom-item"><div><b>${CATEGORIES[c.cat]?.icon||''} ${esc(c.title)}</b>${c.hot?' 🔥':''}<div class="muted tiny">${esc(c.text)}</div></div>
+      <button class="btn btn-danger btn-sm" onclick="app.delCustom(${i})">✕</button></div>`).join('') : '<p class="muted small">Aún no has creado ninguna.</p>';
+  }
+  setMystery(v){ this.settings.mystery=v; this.save(); }
+  setOnline(v){ this.settings.online=v; this.save(); }
+  setMissions(n){ this.settings.missionsPerPlayer=n; this.save(); this.renderSettings(); }
+  setHot(v){ this.settings.hot=v; this.save(); this.renderSettings(); }
+  toggleCat(k, input){
+    const a=this.settings.activeCategories;
+    if (a.includes(k)){
+      if (a.length<=1){ input.checked=true; return ui.alert('Tiene que haber al menos una categoría activa.'); }
+      a.splice(a.indexOf(k),1);
+    } else a.push(k);
+    this.save();
+  }
+  addCustom(){
+    const title=$('cu-title').value.trim().toUpperCase(), text=$('cu-text').value.trim(), cat=$('cu-cat').value;
+    const penalty=$('cu-pen').value.trim(), time=parseInt($('cu-time').value,10), hot=$('cu-hot').checked;
+    if (!title||!text) return ui.alert('Pon al menos el título y el texto.');
+    const card={ id:'cu_'+Date.now(), cat, title, text, penalty: penalty || (cat==='VIRUS'?'':'2 castigos'), hot };
+    if (time>0) card.time=Math.min(time,300);
+    if (cat==='VIRUS') card.rule={ kind:'virus', text };
+    this.settings.customCards.push(card);
+    ['cu-title','cu-text','cu-pen','cu-time'].forEach(id=>$(id).value=''); $('cu-hot').checked=false;
+    this.save(); this.renderSettings();
+    ui.alert(`Carta guardada en ${CATEGORIES[cat].icon} ${CATEGORIES[cat].name}.${hot&&!this.settings.hot?' Recuerda activar las cartas +18 para que salga.':''}`);
+  }
+  async delCustom(i){ const c=this.settings.customCards[i]; if(c && await ui.confirm(`¿Borrar la carta «${esc(c.title)}»?`,'Borrar')){ this.settings.customCards.splice(i,1); this.save(); this.renderSettings(); } }
+
+  /* ---------- Fin de partida ---------- */
+  async endGame(){
+    if (!(await ui.confirm('¿Terminar la partida y ver el resultado?','Terminar'))) return;
+    this.stopTimer(); clearTimeout(this.bombId); this.bombId=null;
+    const g=this.game; if(!g) return this.nav('home');
+    let html='';
+    if (Object.keys(g.missions).length){
+      html += `<div class="panel"><b>🔪 Asesino:</b> ${esc(g.roles.killer)} ${g.roles.timesCaught?`(cazado ${g.roles.timesCaught} ${g.roles.timesCaught===1?'vez':'veces'} 👮)`:'(nunca le pillaron 😈)'}<br><b>👮 Policía:</b> ${esc(g.roles.police)}</div>`;
+      const ranking = g.players.map(p=>{ const ms=g.missions[p]||[]; return { p, ms, done:ms.filter(m=>m.status==='done').length, caught:ms.filter(m=>m.status==='caught').length }; })
+        .sort((a,b)=>b.done-a.done || a.caught-b.caught);
+      ranking.forEach(r=>{
+        const roasts=[];
+        if (r.ms.length && r.done===r.ms.length) roasts.push(rnd(ROASTS_ALL_DONE).replace(/\{P\}/g,r.p));
+        if (r.caught) roasts.push(rnd(ROASTS_CAUGHT).replace(/\{P\}/g,r.p).replace(/\{N\}/g,r.caught));
+        const failed = r.ms.filter(m=>m.status==='pending');
+        if (failed.length) roasts.push(rnd(failed).fail.replace(/\{P\}/g,r.p));
+        html += `<div class="end-player"><div class="row" style="justify-content:space-between"><b style="font-size:1.05rem">${esc(r.p)}</b>
+          <span class="small">✅ ${r.done}/${r.ms.length}${r.caught?` · 🚨 ${r.caught}`:''}</span></div>
+          ${r.done?`<div class="small" style="color:#6ee7b7">Reparte <b>${r.done*CONFIG.REWARD_MISSION} castigos</b></div>`:''}
+          <div class="tiny muted">${r.ms.map(m=>`${m.status==='done'?'✅':m.status==='caught'?'🚨':'❌'} ${esc(m.text)}`).join('<br>')}</div>
+          ${roasts.map(t=>`<div class="roast">${esc(t)}</div>`).join('')}</div>`;
+      });
+    }
+    const top = Object.entries(g.stats.cats).sort((a,b)=>b[1]-a[1])[0];
+    html += `<div class="panel stack">
+      <div class="meta-row"><span class="muted">Cartas jugadas</span><span class="v">${g.round}</span></div>
+      <div class="meta-row"><span class="muted">Virus</span><span class="v">${g.stats.virus}</span></div>
+      <div class="meta-row"><span class="muted">Acusaciones de anomalía</span><span class="v">${g.stats.accusations} (${g.stats.hits} aciertos)</span></div>
+      <div class="meta-row"><span class="muted">Categoría que más salió</span><span class="v">${top?CATEGORIES[top[0]]?.name:'--'}</span></div></div>`;
+    $('end-content').innerHTML = html;
+    if (g.online){
+      const summary = this._lastSummary || null;
+      NET.pub('end', { ended:true, html }, true);
+      setTimeout(()=>NET.disconnect(), 1500);
+    }
+    this.game = null; this.save();
+    this.nav('gameover');
+  }
+}
+
+
+/* =====================================================================
+   6. RED: cada jugador en su móvil (MQTT público, sin cuentas)
+   ===================================================================== */
+const NET = {
+  BROKERS: ['wss://broker.hivemq.com:8884/mqtt', 'wss://broker.emqx.io:8084/mqtt', 'wss://test.mosquitto.org:8081'],
+  PREFIX: 'anomalia-jc5/v1',
+  client: null, room: null, b: 0, connected: false, cid: Math.random().toString(36).slice(2,10),
+  onMsg: null, onStatus: null,
+  override(){ try { return new URLSearchParams(location.search).get('broker'); } catch(e){ return null; } },
+  available(){ return typeof mqtt !== 'undefined' && location.protocol !== 'file:'; },
+  url(b){ return this.override() || this.BROKERS[b] || this.BROKERS[0]; },
+  uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,6); },
+  t(sub){ return `${this.PREFIX}/${this.room}/${sub}`; },
+  connect(room, b, timeout=7000){
+    this.disconnect();
+    this.room = room; this.b = b;
+    return new Promise(res => {
+      let done = false;
+      const fin = ok => { if (!done){ done = true; res(ok); } };
+      let c;
+      try {
+        c = mqtt.connect(this.url(b), { clientId:'an_'+this.cid+'_'+Math.random().toString(36).slice(2,6), clean:true,
+          keepalive:30, reconnectPeriod:2000, connectTimeout:timeout });
+      } catch(e){ return fin(false); }
+      this.client = c;
+      c.on('connect', () => {
+        this.connected = true;
+        c.subscribe(this.t('#'), { qos:1 });
+        this.onStatus && this.onStatus(true);
+        fin(true);
+      });
+      c.on('close', () => { if (this.connected){ this.connected = false; this.onStatus && this.onStatus(false); } });
+      c.on('offline', () => { this.connected = false; this.onStatus && this.onStatus(false); });
+      c.on('error', () => {});
+      c.on('message', (topic, payload) => {
+        const sub = topic.slice(this.t('').length);
+        let data = null; const txt = payload.toString();
+        if (txt) { try { data = JSON.parse(txt); } catch(e){ return; } }
+        this.onMsg && this.onMsg(sub, data);
+      });
+      setTimeout(() => fin(false), timeout + 500);
+    });
+  },
+  async connectAny(room){
+    if (this.override()) return (await this.connect(room, 0)) ? 0 : -1;
+    for (let b = 0; b < this.BROKERS.length; b++) if (await this.connect(room, b, 6000)) return b;
+    this.disconnect(); return -1;
+  },
+  pub(sub, obj, retain=false){
+    if (!this.client) return;
+    try { this.client.publish(this.t(sub), obj == null ? '' : JSON.stringify(obj), { qos:1, retain }); } catch(e){}
+  },
+  disconnect(){ try { this.client && this.client.end(true); } catch(e){} this.client = null; this.connected = false; }
+};
+const ROOM_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const newRoom = () => Array.from({length:5}, () => ROOM_CHARS[Math.floor(Math.random()*ROOM_CHARS.length)]).join('');
+
+function evtText(e){
+  if (e.type==='acc') return e.hit ? `🚨 <b>${esc(e.from)}</b> ha pillado a <b>${esc(e.to)}</b> haciendo una misión: <b>${esc(e.to)}</b> bebe ${CONFIG.PEN_CAUGHT}.`
+                                   : `🤡 <b>${esc(e.from)}</b> acusó a <b>${esc(e.to)}</b> en falso: <b>${esc(e.from)}</b> bebe ${CONFIG.PEN_FALSE_ACCUSE}.`;
+  if (e.type==='killer') return `🔪 ¡ASESINO CAZADO! <b>${esc(e.who)}</b> era el Asesino y bebe ${CONFIG.PEN_KILLER_CAUGHT}.${e.other?` <b>${esc(e.other)}</b> era un impostor: se acaba la bebida.`:''} Puede seguir matando… con cuidado 😏`;
+  if (e.type==='impostor') return `🎭 ¡ASESINO FALSO! <b>${esc(e.who)}</b> guiñaba haciéndose pasar por el Asesino: se acaba la bebida.`;
+  if (e.type==='policeMiss') return `🤦 <b>${esc(e.by)}</b> (el Policía) acusó a <b>${esc(e.who)}</b>, que no había hecho nada: <b>${esc(e.by)}</b> bebe ${CONFIG.PEN_POLICE_FAIL}.`;
+  if (e.type==='fakeCop') return `🕵️ <b>${esc(e.by)}</b> se hizo pasar por el Policía: bebe ${CONFIG.PEN_POLICE_FAIL}.`;
+  if (e.type==='doubleFail') return `💀 <b>${esc(e.vic)}</b> falló con el doble guiño (<b>${esc(e.pick)}</b> no es el Asesino): bebe ${CONFIG.PEN_DOUBLE_FAIL}.`;
+  if (e.type==='msg') return `${e.icon||''} <b>${esc(e.title||'')}</b> ${esc(e.text||'')}`;
+  return '';
+}
+
+Object.assign(App.prototype, {
+  /* ---------- utilidades comunes ---------- */
+  toast(html, ms=6000){
+    const t=document.createElement('div'); t.className='toast'; t.innerHTML=html;
+    t.onclick=()=>t.remove(); document.body.appendChild(t);
+    try{ navigator.vibrate && navigator.vibrate(150); }catch(e){}
+    setTimeout(()=>t.remove(), ms);
+  },
+  joinUrl(){
+    const g=this.game; const base = location.origin + location.pathname;
+    const ov = NET.override();
+    return `${base}?r=${g.online.room}&b=${g.online.b}${ov?`&broker=${encodeURIComponent(ov)}`:''}`;
+  },
+  qrHTML(text){
+    try { const q = qrcode(0,'M'); q.addData(text); q.make(); return q.createSvgTag({ cellSize:4, margin:0, scalable:true }); }
+    catch(e){ return ''; }
+  },
+
+  /* =================== MÓVIL PRINCIPAL =================== */
+  async netHost(){
+    const g=this.game;
+    ui._open('<p style="text-align:center">📡 Creando la sala…</p>');
+    const room = newRoom();
+    this.netBind();
+    const b = await NET.connectAny(room);
+    ui.close();
+    if (b < 0) return false;
+    g.online = { room, b, n:{}, joined:{}, seen:[] };
+    this.netPublishSetup();
+    this.save();
+    this.nav('lobby'); this.renderLobby();
+    return true;
+  },
+  netPublishSetup(){
+    const g=this.game;
+    NET.pub('setup', { v:1, players:g.players, roles:{ killer:g.roles.killer, police:g.roles.police },
+      missions: Object.fromEntries(g.players.map(p=>[p, g.missions[p].map(m=>({ id:m.id, text:m.text, fail:m.fail }))])) }, true);
+  },
+  async netResume(){
+    const g=this.game; if (!g || !g.online) return;
+    this.netBind();
+    const ok = await NET.connect(g.online.room, g.online.b);
+    if (ok) this.netPublishSetup();
+    if (this.screen==='game') this.renderGame();
+  },
+  netBind(){
+    NET.onStatus = () => { if (this.screen==='game') this.renderGame(); if (this.screen==='lobby') this.renderLobby(); this.renderLobbyOverlay && this._lobbyOpen && this.renderLobbyOverlay(); };
+    NET.onMsg = (sub, data) => this.netHostMsg(sub, data);
+  },
+  netHostMsg(sub, data){
+    const g=this.game; if (!g || !g.online) return;
+    const o=g.online;
+    if (sub.startsWith('state/')){
+      const i=+sub.split('/')[1]; const p=g.players[i]; if (!p || !data) return;
+      if (data.joined) o.joined[p]=true;
+      if ((data.n||0) > (o.n[p]||0)){
+        o.n[p]=data.n;
+        (data.statuses||[]).forEach((st,k)=>{ if (g.missions[p][k]) g.missions[p][k].status=st; });
+      }
+      this.save();
+      if (this.screen==='lobby') this.renderLobby();
+      if (this._lobbyOpen) this.renderLobbyOverlay();
+      if (this._viewing===p && $('overlay').classList.contains('active') && this._viewMode==='missions') this.showMyMissions(p);
+    } else if (sub==='evt' && data){
+      if (o.seen.includes(data.id)) return; o.seen.push(data.id); if (o.seen.length>200) o.seen.shift();
+      if (data.origin===NET.cid) return;
+      // estadísticas en el móvil principal
+      if (data.type==='acc'){ g.stats.accusations++; data.hit?g.stats.hits++:g.stats.misses++; }
+      if (data.type==='killer'){ g.roles.timesCaught=(g.roles.timesCaught||0)+1; g.roles.killerCaught=true; }
+      if (data.type==='impostor') g.stats.impostors=(g.stats.impostors||0)+1;
+      if (data.type==='policeMiss') g.stats.policeMisses++;
+      this.save();
+      if (this._waitAcc && data.type==='acc' && data.id===this._waitAcc){
+        this._waitAcc=null; this.accResultOverlay(data);
+      } else this.toast(evtText(data));
+    }
+  },
+  netPushState(p){
+    const g=this.game; if (!g || !g.online) return;
+    const o=g.online; const i=g.players.indexOf(p);
+    o.n[p]=(o.n[p]||0)+1;
+    NET.pub(`state/${i}`, { n:o.n[p], statuses:g.missions[p].map(m=>m.status), joined:!!o.joined[p], by:'host' }, true);
+  },
+  lobbyHTML(){
+    const g=this.game, o=g.online, url=this.joinUrl();
+    const rows = g.players.map((p,i)=>`<div class="status-row"><span>${o.joined[p]?'🟢':'⚪'} <b>${esc(p)}</b></span>
+      ${o.joined[p]?'<span class="small muted">en su móvil</span>':`<button class="btn btn-sm btn-purple" onclick="app.viewHere(${i})">🔒 Ver aquí</button>`}</div>`).join('');
+    return `<div class="panel stack" style="text-align:center">
+        <p class="small muted">Que cada uno escanee el QR o abra el enlace y elija su nombre</p>
+        <div class="qr">${this.qrHTML(url)}</div>
+        <div class="code">${o.room}</div>
+        <button class="btn btn-sm" onclick="app.copyLink()">📋 Copiar enlace para WhatsApp</button>
+      </div>
+      <div class="setting-title">Jugadores</div>${rows}
+      <p class="tiny muted">¿Alguien sin móvil o sin batería? Pulsa «Ver aquí» y que mire sus misiones en este móvil.</p>`;
+  },
+  renderLobby(){
+    if (!this.game || !this.game.online) return;
+    $('lobby-net').innerHTML = `<span class="dot ${NET.connected?'on':'off'}"></span>${NET.connected?'Conectado':'Sin conexión'}`;
+    $('lobby-content').innerHTML = this.lobbyHTML();
+  },
+  lobbyStart(){ this.nav('game'); if (this.game.current) this.renderGame(); else this.nextCard(); },
+  openLobbyOverlay(){ this._lobbyOpen=true; this.renderLobbyOverlay(); $('overlay').classList.add('active'); },
+  renderLobbyOverlay(){
+    if (!this._lobbyOpen) return;
+    $('overlay-inner').innerHTML = `<h2>📱 JUGADORES <span class="small"><span class="dot ${NET.connected?'on':'off'}"></span></span></h2>${this.lobbyHTML()}
+      <button class="btn btn-primary" onclick="app.closeOverlay()">Cerrar</button>`;
+  },
+  viewHere(i){
+    const p=this.game.players[i]; this._lobbyOpen=false;
+    this.gateOverlay(p, 'Que nadie más mire la pantalla 👀', ()=>{ this._viewMode='missions'; this.showMyMissions(p); });
+  },
+  async copyLink(){
+    const url=this.joinUrl();
+    try { await navigator.clipboard.writeText(url); this.toast('📋 Enlace copiado. Pégalo en el grupo de WhatsApp.'); }
+    catch(e){ ui.alert(`Copia este enlace:<br><textarea class="input" rows="3" readonly onclick="this.select()">${esc(url)}</textarea>`); }
+  },
+  /* acusación lanzada desde el móvil principal */
+  netAccuse(accuser, accused){
+    const g=this.game, o=g.online, id=NET.uid();
+    if (!o.joined[accused] || !NET.connected){
+      return this.gateOverlay(accused, `<b>${esc(accuser)}</b> dice que lo que acabas de hacer era una misión secreta. Sé honrado 😇`, ()=>this.accusedAnswer(accuser, accused));
+    }
+    this._waitAcc=id;
+    NET.pub(`acc/${g.players.indexOf(accused)}`, { id, from:accuser, origin:NET.cid }, true);
+    $('overlay-inner').innerHTML = `<div style="text-align:center" class="stack"><div style="font-size:3rem">⏳</div>
+      <h2>Esperando a ${esc(accused)}…</h2><p class="muted">Le ha saltado la acusación en su móvil. Tiene que responder con sinceridad 😇</p>
+      <button class="btn" id="acc-here">Responder en este móvil</button>
+      <button class="btn btn-danger" id="acc-cancel">Cancelar acusación</button></div>`;
+    $('acc-here').onclick = ()=>{ NET.pub(`acc/${g.players.indexOf(accused)}`, null, true); this._waitAcc=null;
+      this.gateOverlay(accused, `<b>${esc(accuser)}</b> dice que lo que acabas de hacer era una misión secreta. Sé honrado 😇`, ()=>this.accusedAnswer(accuser, accused)); };
+    $('acc-cancel').onclick = ()=>{ NET.pub(`acc/${g.players.indexOf(accused)}`, null, true); this._waitAcc=null; this.closeOverlay(); };
+  },
+  accResultOverlay(e){
+    const html = e.hit
+      ? `<div style="font-size:3rem">🚨</div><h2>¡PILLADO!</h2><p><b>${esc(e.to)}</b> estaba haciendo una misión.</p>
+         <p style="font-size:1.2rem"><b>${esc(e.to)}</b> bebe <b style="color:#fca5a5">${CONFIG.PEN_CAUGHT} castigos</b> y esa misión queda anulada.</p>`
+      : `<div style="font-size:3rem">🤡</div><h2>¡INOCENTE!</h2><p><b>${esc(e.to)}</b> no estaba haciendo ninguna misión.</p>
+         <p style="font-size:1.2rem"><b>${esc(e.from)}</b> bebe <b style="color:#fca5a5">${CONFIG.PEN_FALSE_ACCUSE} castigos</b> por paranoico.</p>`;
+    $('overlay-inner').innerHTML = `<div style="text-align:center" class="stack">${html}<button class="btn btn-primary" onclick="app.closeOverlay()">Seguir jugando</button></div>`;
+    $('overlay').classList.add('active');
+  },
+
+  /* =================== MÓVIL DE CADA JUGADOR =================== */
+  async initPlayer(room, b){
+    this.pv = { room, setup:null, me:null, n:{}, statuses:{}, joined:{}, seen:[], ended:null, show:false };
+    document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
+    $('screen-join').classList.add('active'); this.screen='join';
+    if (!NET.available()){ $('join-sub').textContent='Este navegador no puede conectarse. Prueba a abrir el enlace en Chrome o Safari.'; return; }
+    NET.onMsg = (sub, data) => this.netPlayerMsg(sub, data);
+    NET.onStatus = () => this.renderMe();
+    const ok = await NET.connect(room, b);
+    if (!ok) $('join-sub').innerHTML = 'No consigo conectar 😕. Revisa que tengas internet; sigo intentándolo…';
+    setTimeout(()=>{ if (!this.pv.setup) $('join-sub').innerHTML = `No encuentro la partida <b>${esc(room)}</b>. ¿Seguro que el enlace es el último que ha mandado quien lleva el juego?`; }, 9000);
+  },
+  pvKey(){ return 'anomalia_me_'+this.pv.room; },
+  netPlayerMsg(sub, data){
+    const pv=this.pv;
+    if (sub==='setup'){
+      if (!data) return;
+      pv.setup=data;
+      data.players.forEach(p=>{ if (!pv.statuses[p]) pv.statuses[p]=data.missions[p].map(()=> 'pending'); });
+      const saved = store.get(this.pvKey());
+      if (!pv.me && saved && data.players.includes(saved)) setTimeout(()=>this.choose(saved), 600);
+      else if (!pv.me) this.renderJoin();
+    } else if (sub.startsWith('state/')){
+      if (!pv.setup || !data) return;
+      const p=pv.setup.players[+sub.split('/')[1]]; if (!p) return;
+      if (data.joined) pv.joined[p]=true;
+      if ((data.n||0) > (pv.n[p]||0)){ pv.n[p]=data.n; pv.statuses[p]=data.statuses; }
+      if (!pv.me) this.renderJoin(); else if (p===pv.me) this.renderMe();
+    } else if (sub.startsWith('acc/')){
+      if (!pv.setup || !pv.me) { pv.pendingAcc = { sub, data }; return; }
+      const p=pv.setup.players[+sub.split('/')[1]];
+      if (p===pv.me){
+        if (data && data.id) this.pvAccusedPrompt(data);
+        else if (this._accOpen){ this._accOpen=false; this.closeOverlay(); }
+      }
+    } else if (sub==='evt' && data){
+      if (pv.seen.includes(data.id)) return; pv.seen.push(data.id);
+      if (this._waitAcc && data.type==='acc' && data.id===this._waitAcc){ this._waitAcc=null; return this.accResultOverlay(data); }
+      if (data.origin===NET.cid) return;
+      this.toast(evtText(data));
+    } else if (sub==='end'){
+      if (data && data.ended){ pv.ended=data; this.renderMe(); }
+    }
+  },
+  renderJoin(){
+    const pv=this.pv; if (!pv.setup) return;
+    $('join-sub').innerHTML = `Partida <b>${esc(pv.room)}</b>. ¿Quién eres?`;
+    $('join-list').innerHTML = pv.setup.players.map((p,i)=>`<button class="btn btn-block" style="padding:16px;justify-content:space-between" data-i="${i}">
+      <span>${esc(p)}</span><span class="small muted">${pv.joined[p]?'🟢 ya conectado':''}</span></button>`).join('');
+    $('join-list').querySelectorAll('[data-i]').forEach(b=>b.onclick=async()=>{
+      const p=pv.setup.players[+b.dataset.i];
+      if (pv.joined[p] && !(await ui.confirm(`Parece que <b>${esc(p)}</b> ya ha entrado desde otro móvil. ¿Eres tú?`,'Sí, soy yo'))) return;
+      if (!(await ui.confirm(`¿Seguro que eres <b>${esc(p)}</b>? Vas a ver sus misiones secretas.`,'Soy yo'))) return;
+      this.choose(p);
+    });
+  },
+  choose(p){
+    const pv=this.pv; pv.me=p; store.set(this.pvKey(), p);
+    pv.joined[p]=true;
+    this.pvPush();
+    document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
+    $('screen-me').classList.add('active'); this.screen='me';
+    this.renderMe();
+    if (pv.pendingAcc){ const a=pv.pendingAcc; pv.pendingAcc=null; this.netPlayerMsg(a.sub, a.data); }
+  },
+  pvPush(){
+    const pv=this.pv, p=pv.me, i=pv.setup.players.indexOf(p);
+    pv.n[p]=(pv.n[p]||0)+1;
+    NET.pub(`state/${i}`, { n:pv.n[p], statuses:pv.statuses[p], joined:true, by:'player' }, true);
+  },
+  pvMissions(p){ const pv=this.pv; return (pv.setup.missions[p]||[]).map((m,k)=>({ ...m, status:(pv.statuses[p]||[])[k]||'pending' })); },
+  pvRoleHTML(){
+    const pv=this.pv, r=pv.setup.roles, p=pv.me;
+    const fake = { roles:r };
+    const save=this.game; this.game=fake; const h=this.roleHTML(p); this.game=save; return h;
+  },
+  renderMe(){
+    const pv=this.pv; if (!pv || !pv.me || this.screen!=='me') return;
+    $('me-name').textContent = pv.me;
+    $('me-net').innerHTML = `<span class="dot ${NET.connected?'on':'off'}"></span>`;
+    if (pv.ended){
+      $('me-content').innerHTML = `<h2 class="title-grad">🏁 FIN DE LA PARTIDA</h2>${pv.ended.html}`;
+      return;
+    }
+    const ms=this.pvMissions(pv.me);
+    const list = ms.map((m,k)=>{
+      const cls = m.status==='done'?'done':(m.status==='caught'?'caught':'');
+      const btn = m.status==='pending' ? `<button class="btn btn-ok btn-sm" onclick="app.pvMark(${k},'done')">✅ La he cumplido</button>`
+        : m.status==='done' ? `<div class="row" style="justify-content:space-between"><span class="small" style="color:#6ee7b7">✅ Cumplida</span><button class="btn btn-sm" onclick="app.pvMark(${k},'pending')">Deshacer</button></div>`
+        : `<div class="row" style="justify-content:space-between"><span class="small" style="color:#fca5a5">🚨 Te pillaron: anulada</span><button class="btn btn-sm" onclick="app.pvMark(${k},'pending')">Deshacer</button></div>`;
+      return `<div class="mission ${cls}"><div><b>Misión ${k+1}.</b> ${esc(m.text)}</div>${btn}</div>`;
+    }).join('');
+    $('me-content').innerHTML = `
+      <div class="stack ${pv.show?'':'blur'}">${this.pvRoleHTML()}${list}</div>
+      <button class="btn ${pv.show?'':'btn-purple'}" onclick="app.pvToggle()">${pv.show?'🙈 Ocultar':'👁️ Ver mi rol y mis misiones'}</button>
+      <div class="actions">
+        <button class="btn btn-danger" onclick="app.pvAccuse()"><span>🚨</span>¡Anomalía!</button>
+        <button class="btn" onclick="app.pvDouble()"><span>😵</span>Doble guiño</button>
+        <button class="btn" onclick="app.pvPolice()"><span>👮</span>¡Alto!</button>
+      </div>
+      <p class="tiny muted" style="text-align:center">Puedes cerrar esta página: al volver a abrir el enlace sigues donde estabas.</p>`;
+  },
+  pvToggle(){ this.pv.show=!this.pv.show; this.renderMe(); },
+  pvMark(k, st){ const pv=this.pv; pv.statuses[pv.me]=[...pv.statuses[pv.me]]; pv.statuses[pv.me][k]=st; this.pvPush(); this.renderMe(); },
+  pvOthers(){ return this.pv.setup.players.filter(p=>p!==this.pv.me); },
+  pvAccuse(){
+    const pv=this.pv;
+    this.pickPlayerOverlay('🚨 ¡ANOMALÍA!','Has gritado «¡ESO HA SIDO UNA ANOMALÍA!». ¿A quién acusas?', this.pvOthers(), to=>{
+      if (!pv.joined[to]) return this.pvEventLocal('📵', `${esc(to)} no tiene el juego abierto`,
+        `<p>Que responda en voz alta (con sinceridad 😇) y que quien lleva el juego lo apunte en <b>🚨</b> desde el móvil principal.</p>`);
+      const id=NET.uid(); this._waitAcc=id;
+      NET.pub(`acc/${pv.setup.players.indexOf(to)}`, { id, from:pv.me, origin:NET.cid }, true);
+      $('overlay-inner').innerHTML = `<div style="text-align:center" class="stack"><div style="font-size:3rem">⏳</div>
+        <h2>Esperando a ${esc(to)}…</h2><p class="muted">Le ha saltado la acusación en su móvil.</p>
+        <button class="btn btn-danger" id="acc-cancel">Cancelar acusación</button></div>`;
+      $('acc-cancel').onclick = ()=>{ NET.pub(`acc/${pv.setup.players.indexOf(to)}`, null, true); this._waitAcc=null; this.closeOverlay(); };
+    });
+  },
+  pvAccusedPrompt(a){
+    const pv=this.pv;
+    const ms=this.pvMissions(pv.me).map((m,k)=>({m,k})).filter(x=>x.m.status==='pending');
+    this._accOpen=true;
+    $('overlay-inner').innerHTML = `<div style="font-size:3rem;text-align:center">🚨</div>
+      <h2>${esc(a.from)} te acusa</h2>
+      <p class="muted small">Dice que lo que acabas de hacer era una misión secreta. Sé honrado 😇: si era una de estas, tócala.</p>
+      <div class="pick-list">${ms.map(x=>`<button class="btn btn-block" style="text-align:left;justify-content:flex-start" data-k="${x.k}">🎯 ${esc(x.m.text)}</button>`).join('')}</div>
+      <button class="btn btn-ok" id="acc-no">😇 No, soy inocente</button>`;
+    $('overlay').classList.add('active');
+    const answer = k => {
+      this._accOpen=false;
+      if (k>=0){ pv.statuses[pv.me]=[...pv.statuses[pv.me]]; pv.statuses[pv.me][k]='caught'; this.pvPush(); }
+      NET.pub(`acc/${pv.setup.players.indexOf(pv.me)}`, null, true);
+      const e = { type:'acc', id:a.id, from:a.from, to:pv.me, hit:k>=0 };
+      pv.seen.push(a.id);
+      NET.pub('evt', e);
+      this.accResultOverlay(e); this.renderMe();
+    };
+    $('overlay-inner').querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>answer(+b.dataset.k));
+    $('acc-no').onclick = ()=>answer(-1);
+  },
+  pvEvent(e, icon, title, body){
+    e.id=NET.uid(); e.origin=NET.cid; this.pv.seen.push(e.id); NET.pub('evt', e);
+    $('overlay-inner').innerHTML = `<div style="text-align:center" class="stack"><div style="font-size:3rem">${icon}</div><h2>${title}</h2>${body}
+      <button class="btn btn-primary" onclick="app.closeOverlay()">Seguir jugando</button></div>`;
+    $('overlay').classList.add('active');
+  },
+  pvEventLocal(icon, title, body){
+    $('overlay-inner').innerHTML = `<div style="text-align:center" class="stack"><div style="font-size:3rem">${icon}</div><h2>${title}</h2>${body}
+      <button class="btn btn-primary" onclick="app.closeOverlay()">Vale</button></div>`;
+    $('overlay').classList.add('active');
+  },
+  async pvPolice(){
+    const pv=this.pv, r=pv.setup.roles;
+    if (r.police!==pv.me){
+      if (!(await ui.confirm(`Este botón es solo para el Policía. Si no lo eres y lo usas, bebes ${CONFIG.PEN_POLICE_FAIL}. ¿Seguir?`,'Seguir'))) return;
+      return this.pvEvent({ type:'fakeCop', by:pv.me }, '🕵️','¡POLICÍA FALSO!', `<p>No eres el Policía. Por hacerte pasar por la ley: <b style="color:#fca5a5">${CONFIG.PEN_POLICE_FAIL} castigos</b>.</p>`);
+    }
+    this.pickPlayerOverlay('👮 ¡ALTO!','¿A quién has visto guiñar el ojo?', this.pvOthers(), sus=>{
+      if (sus===r.killer) return this.pvEvent({ type:'killer', who:sus, by:pv.me }, '🔪','¡ASESINO CAZADO!',
+        `<p><b>${esc(sus)}</b> era el Asesino de verdad: bebe <b style="color:#fca5a5">${CONFIG.PEN_KILLER_CAUGHT} castigos</b>. Puede seguir matando… con cuidado 😏</p>`);
+      $('overlay-inner').innerHTML = `<div style="text-align:center" class="stack"><div style="font-size:3rem">🤨</div>
+        <h2>${esc(sus)} NO es el Asesino</h2><p>¿Le habéis pillado guiñando el ojo de verdad? Que lo confirme la víctima.</p>
+        <button class="btn btn-danger" id="w-yes">🎭 Sí, guiñó: es un impostor</button>
+        <button class="btn" id="w-no">🤦 No, me he equivocado</button></div>`;
+      $('w-yes').onclick = ()=>this.pvEvent({ type:'impostor', who:sus, by:pv.me }, '🎭','¡ASESINO FALSO!',
+        `<p><b>${esc(sus)}</b> guiñaba haciéndose pasar por el Asesino: <b style="color:#fca5a5">se acaba la bebida</b>.</p>`);
+      $('w-no').onclick = ()=>this.pvEvent({ type:'policeMiss', who:sus, by:pv.me }, '🤦','¡INOCENTE!',
+        `<p><b>${esc(sus)}</b> no ha hecho nada. Bebes <b style="color:#fca5a5">${CONFIG.PEN_POLICE_FAIL} castigos</b>. Y ahora todos saben que eres el Policía 👀</p>`);
+    });
+  },
+  pvDouble(){
+    const pv=this.pv, r=pv.setup.roles, rest=this.pvOthers();
+    this.pickPlayerOverlay('😵 ¡DOBLE GUIÑO!','¿Quién te ha guiñado PRIMERO?', rest, a=>{
+      this.pickPlayerOverlay('😵 ¡DOBLE GUIÑO!','¿Y quién te ha guiñado DESPUÉS?', rest.filter(p=>p!==a), b=>{
+        this.pickPlayerOverlay('😵 ¡DOBLE GUIÑO!',`Momento de la verdad: ¿cuál de los dos es el Asesino? Si fallas, bebes ${CONFIG.PEN_DOUBLE_FAIL}.`, [a,b], pick=>{
+          const other = pick===a?b:a;
+          if (pick===r.killer) this.pvEvent({ type:'killer', who:pick, other, by:pv.me }, '🎯','¡ASESINO CAZADO!',
+            `<p><b>${esc(pick)}</b> era el Asesino: bebe <b style="color:#fca5a5">${CONFIG.PEN_KILLER_CAUGHT}</b>. <b>${esc(other)}</b> era un impostor: <b style="color:#fca5a5">se acaba la bebida</b>. Tú te libras 😎</p>`);
+          else this.pvEvent({ type:'doubleFail', vic:pv.me, pick }, '💀','¡HAS FALLADO!',
+            `<p><b>${esc(pick)}</b> no es el Asesino. Bebes <b style="color:#fca5a5">${CONFIG.PEN_DOUBLE_FAIL} castigos</b>. Haber bebido tus ${CONFIG.PEN_KILL} y callado 🤷</p>`);
+        });
+      });
+    });
+  }
+});
+
+const app = new App();
+window.addEventListener('DOMContentLoaded', ()=>app.init());
+</script>
+</body>
+</html>
