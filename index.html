@@ -229,7 +229,7 @@ h1,h2,h3{font-weight:800;letter-spacing:-.02em}
   <div class="actions" id="mystery-actions">
     <button class="btn btn-purple" id="act-1" onclick="app.game&&app.game.online?app.openLobbyOverlay():app.openMyMissions()"><span>🔒</span>Mis misiones</button>
     <button class="btn btn-danger" onclick="app.openAccuse()"><span>🚨</span>¡Anomalía!</button>
-    <button class="btn" onclick="app.openPolice()"><span>👮</span>¡Alto!</button>
+    <button class="btn" onclick="app.openWink()"><span>👮</span>¡Alto!</button>
   </div>
 
   <button class="btn btn-primary btn-block" style="margin-top:12px;padding:18px;font-size:1.1rem" onclick="app.nextCard()">Siguiente carta ➔</button>
@@ -798,9 +798,9 @@ class App {
   }
   roleHTML(p){
     const r = this.game.roles;
-    if (p===r.killer) return `<div class="role-box">🔪 <b>ERES EL ASESINO</b><br>Guiña el ojo a alguien sin que te vea el Policía. Tu víctima espera unos segundos, dice «¡me han matado!» (sin decir quién) y bebe ${CONFIG.PEN_KILL}. Si el Policía te caza, bebes ${CONFIG.PEN_KILLER_CAUGHT}, pero puedes seguir matando.</div>`;
-    if (p===r.police) return `<div class="role-box">👮 <b>ERES EL POLICÍA</b><br>Si ves a alguien guiñar un ojo, grita «¡ALTO!» y pulsa 👮 para ver si es el Asesino. Si lo es, bebe ${CONFIG.PEN_KILLER_CAUGHT}. Si no lo es pero guiñaba haciéndose pasar por él, se acaba el vaso. (Si te equivocas y nadie lo vio, bebes ${CONFIG.PEN_POLICE_FAIL}).</div>`;
-    return `<div class="role-box">🙂 <b>Sin rol especial</b><br>Ni Asesino ni Policía. Solo tus misiones… y cuidado con los guiños. Si guiñas haciéndote pasar por el Asesino y te pilla el Policía, te acabas el vaso.</div>`;
+    if (p===r.killer) return `<div class="role-box">🔪 <b>ERES EL ASESINO</b><br>Guiña el ojo a alguien sin que te vea el Policía. Tu víctima bebe ${CONFIG.PEN_KILL} calladita, sin decir nada a nadie 🤫. Si te cazan (el Policía o una víctima con doble guiño), bebes ${CONFIG.PEN_KILLER_CAUGHT}, pero puedes seguir matando.</div>`;
+    if (p===r.police) return `<div class="role-box">👮 <b>ERES EL POLICÍA</b><br>Si ves a alguien guiñar un ojo, díselo («¡ALTO! ¡Te he pillado!») y pulsa 👮 para ver si es el Asesino. Si lo es, bebe ${CONFIG.PEN_KILLER_CAUGHT}. Si no lo es pero guiñaba haciéndose pasar por él, se acaba el vaso. (Si te equivocas y nadie lo vio, bebes ${CONFIG.PEN_POLICE_FAIL}).</div>`;
+    return `<div class="role-box">🙂 <b>Sin rol especial</b><br>Ni Asesino ni Policía. Solo tus misiones… y cuidado con los guiños: si te guiñan, bebes ${CONFIG.PEN_KILL} calladito. Si te guiñan dos personas distintas, pulsa 😵 Doble guiño y pilla al Asesino. Si guiñas haciéndote pasar por el Asesino y te pilla el Policía, te acabas el vaso.</div>`;
   }
   privateHTML(p, interactive){
     const ms = this.game.missions[p] || [];
@@ -1229,6 +1229,35 @@ class App {
   }
 
   /* ---------- 👮 ¡ALTO! ---------- */
+  openWink(){
+    $('overlay-inner').innerHTML = `<h2>👮 ¡ALTO!</h2>
+      <button class="btn btn-block" style="padding:18px" onclick="app.openPolice()">👮 Soy el Policía y he pillado a alguien</button>
+      <button class="btn btn-block" style="padding:18px" onclick="app.openDouble()">😵 ¡Doble guiño! Me han guiñado dos personas</button>
+      <p class="small muted">Doble guiño: si señalas al Asesino de verdad, le cazas (bebe ${CONFIG.PEN_KILLER_CAUGHT}) y el otro se acaba la bebida por impostor. Si fallas, bebes ${CONFIG.PEN_DOUBLE_FAIL}. Si no quieres arriesgar, bebe tus ${CONFIG.PEN_KILL} y calla.</p>
+      <button class="btn btn-danger" onclick="app.closeOverlay()">Cancelar</button>`;
+    $('overlay').classList.add('active');
+  }
+  openDouble(){
+    const g=this.game;
+    this.pickPlayerOverlay('😵 ¡DOBLE GUIÑO!','¿Quién es la víctima?', g.players, vic=>{
+      const rest=g.players.filter(p=>p!==vic);
+      this.pickPlayerOverlay('😵 ¡DOBLE GUIÑO!',`${esc(vic)}, ¿quién te ha guiñado PRIMERO?`, rest, a=>{
+        this.pickPlayerOverlay('😵 ¡DOBLE GUIÑO!',`¿Y quién te ha guiñado DESPUÉS?`, rest.filter(p=>p!==a), b=>{
+          this.pickPlayerOverlay('😵 ¡DOBLE GUIÑO!',`Momento de la verdad, ${esc(vic)}: ¿cuál de los dos es el Asesino?`, [a,b], pick=>{
+            const other = pick===a ? b : a;
+            if (pick===g.roles.killer){
+              g.roles.killerCaught=true; g.roles.timesCaught=(g.roles.timesCaught||0)+1; g.stats.doubleHits=(g.stats.doubleHits||0)+1; g.stats.impostors=(g.stats.impostors||0)+1;
+              this.resultOverlay('🎯','¡ASESINO CAZADO!', `<p><b>${esc(pick)}</b> era el Asesino de verdad: bebe <b style="color:#fca5a5">${CONFIG.PEN_KILLER_CAUGHT} castigos</b>. Puede seguir matando… con mucho más cuidado 😏</p>
+                <p><b>${esc(other)}</b> era un impostor: <b style="color:#fca5a5">se acaba la bebida</b>.</p><p class="small muted">${esc(vic)} se libra de beber.</p>`);
+            } else {
+              this.resultOverlay('💀','¡HAS FALLADO!', `<p><b>${esc(pick)}</b> no es el Asesino.</p>
+                <p style="font-size:1.2rem"><b>${esc(vic)}</b> bebe <b style="color:#fca5a5">${CONFIG.PEN_DOUBLE_FAIL} castigos</b>. Haber bebido tus ${CONFIG.PEN_KILL} y callado 🤷</p>`);
+            }
+          });
+        });
+      });
+    });
+  }
   resultOverlay(icon, title, body, silent){
     this.save();
     if (!silent && this.game && this.game.online) NET.pub('evt', { type:'msg', icon, title, text: body.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim(), origin:NET.cid, id:NET.uid() });
@@ -1287,8 +1316,11 @@ class App {
       <li><b>Al final</b>, por cada misión cumplida repartes <b>${CONFIG.REWARD_MISSION} castigos</b> entre quien quieras.</li></ul>
       <h3>🔪 Asesino y 👮 Policía</h3>
       <ul><li>Son dos personas distintas, elegidas en secreto. Además tienen sus misiones como todos.</li>
-      <li><b>Asesino:</b> guiña el ojo a alguien sin que el Policía lo vea. La víctima espera unos segundos, dice «¡me han matado!» sin decir quién, y bebe <b>${CONFIG.PEN_KILL}</b>.</li>
-      <li><b>Policía:</b> si ve a alguien guiñar, grita «¡ALTO!» y pulsa <b>👮</b>. La app dice si es el Asesino:
+      <li><b>Asesino:</b> guiña el ojo a alguien sin que el Policía lo vea. La víctima <b>no dice nada</b>: bebe <b>${CONFIG.PEN_KILL}</b> en silencio y sigue como si nada 🤫. La mesa no tiene por qué enterarse.</li>
+      <li><b>😵 Doble guiño:</b> si te guiñan <b>dos personas distintas</b>, uno de los dos es un impostor. Grita «¡ALTO!» y pulsa <b>😵 Doble guiño</b> (o 👮 ¡Alto! en el móvil principal). Señala cuál de los dos es el Asesino:
+        <ul><li>Aciertas: el Asesino bebe <b>${CONFIG.PEN_KILLER_CAUGHT}</b>, el otro se acaba el vaso por impostor y tú no bebes.</li>
+        <li>Fallas: bebes <b>${CONFIG.PEN_DOUBLE_FAIL}</b>. Si no quieres arriesgar, bebe tus ${CONFIG.PEN_KILL} y calla.</li></ul></li>
+      <li><b>Policía:</b> si ve a alguien guiñar, se lo dice en voz alta («¡ALTO! ¡Te he pillado!») y pulsa <b>👮</b>. La app dice si es el Asesino:
         <ul><li>Es el Asesino: bebe <b>${CONFIG.PEN_KILLER_CAUGHT}</b>. Puede seguir matando, pero cada vez que le cacen vuelve a beber ${CONFIG.PEN_KILLER_CAUGHT}.</li>
         <li>No es el Asesino pero guiñaba haciéndose pasar por él (lo admite o alguien lo vio): <b>se acaba el vaso entero</b> 🎭</li>
         <li>(Si lo niega y nadie lo vio, el Policía bebe ${CONFIG.PEN_POLICE_FAIL}. Pero sois amigos: no mintáis 😇)</li></ul></li>
@@ -1759,8 +1791,9 @@ Object.assign(App.prototype, {
     $('me-content').innerHTML = `
       <div class="stack ${pv.show?'':'blur'}">${this.pvRoleHTML()}${list}</div>
       <button class="btn ${pv.show?'':'btn-purple'}" onclick="app.pvToggle()">${pv.show?'🙈 Ocultar':'👁️ Ver mi rol y mis misiones'}</button>
-      <div class="actions" style="grid-template-columns:1fr 1fr">
+      <div class="actions">
         <button class="btn btn-danger" onclick="app.pvAccuse()"><span>🚨</span>¡Anomalía!</button>
+        <button class="btn" onclick="app.pvDouble()"><span>😵</span>Doble guiño</button>
         <button class="btn" onclick="app.pvPolice()"><span>👮</span>Policía</button>
       </div>
       <p class="tiny muted" style="text-align:center">Puedes cerrar esta página: al volver a abrir el enlace sigues donde estabas.</p>`;
@@ -1828,6 +1861,20 @@ Object.assign(App.prototype, {
     });
   },
 
+  pvDouble(){
+    const pv=this.pv, r=pv.setup.roles, rest=this.pvOthers();
+    this.pickPlayerOverlay('😵 ¡DOBLE GUIÑO!','¿Quién te ha guiñado PRIMERO?', rest, a=>{
+      this.pickPlayerOverlay('😵 ¡DOBLE GUIÑO!','¿Y quién te ha guiñado DESPUÉS?', rest.filter(p=>p!==a), b=>{
+        this.pickPlayerOverlay('😵 ¡DOBLE GUIÑO!',`Momento de la verdad: ¿cuál de los dos es el Asesino? Si fallas, bebes ${CONFIG.PEN_DOUBLE_FAIL}.`, [a,b], pick=>{
+          const other = pick===a?b:a;
+          if (pick===r.killer) this.pvEvent({ type:'killer', who:pick, other, by:pv.me }, '🎯','¡ASESINO CAZADO!',
+            `<p><b>${esc(pick)}</b> era el Asesino: bebe <b style="color:#fca5a5">${CONFIG.PEN_KILLER_CAUGHT}</b>. <b>${esc(other)}</b> era un impostor: <b style="color:#fca5a5">se acaba la bebida</b>. Tú te libras 😎</p>`);
+          else this.pvEvent({ type:'doubleFail', vic:pv.me, pick }, '💀','¡HAS FALLADO!',
+            `<p><b>${esc(pick)}</b> no es el Asesino. Bebes <b style="color:#fca5a5">${CONFIG.PEN_DOUBLE_FAIL} castigos</b>. Haber bebido tus ${CONFIG.PEN_KILL} y callado 🤷</p>`);
+        });
+      });
+    });
+  }
 });
 
 const app = new App();
