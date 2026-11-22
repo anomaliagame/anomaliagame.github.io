@@ -362,13 +362,14 @@ const CONFIG = {
 };
 
 const CATEGORIES = {
-  YO_NUNCA:       { name: 'YO NUNCA',        icon: '🙋', color: '#0891b2', weight: 16 },
-  RETO:           { name: 'RETO',            icon: '🎯', color: '#d97706', weight: 16 },
-  CAOS:           { name: 'CAOS',            icon: '🌀', color: '#db2777', weight: 16 },
-  MINIJUEGO:      { name: 'MINIJUEGO',       icon: '🎮', color: '#4f46e5', weight: 16 },
-  VOTACION:       { name: 'VOTACIÓN',        icon: '🗳️', color: '#7c3aed', weight: 16 },
-  VIRUS:          { name: 'VIRUS',           icon: '☣️', color: '#dc2626', weight: 14 },
-  CASTIGO_MAXIMO: { name: 'CASTIGO MÁXIMO',  icon: '💥', color: '#991b1b', weight: 3, minGap: 15 }   // minGap: mínimo de cartas entre dos de esta categoría
+  // weight = % aproximado de cartas. minGap = mínimo de cartas entre dos de la categoría. minStart = no sale antes de esa carta
+  YO_NUNCA:       { name: 'YO NUNCA',        icon: '🙋', color: '#0891b2', weight: 20 },
+  RETO:           { name: 'RETO',            icon: '🎯', color: '#d97706', weight: 15 },
+  CAOS:           { name: 'CAOS',            icon: '🌀', color: '#db2777', weight: 15 },
+  MINIJUEGO:      { name: 'MINIJUEGO',       icon: '🎮', color: '#4f46e5', weight: 12, minGap: 3 },
+  VOTACION:       { name: 'VOTACIÓN',        icon: '🗳️', color: '#7c3aed', weight: 23 },
+  VIRUS:          { name: 'VIRUS',           icon: '☣️', color: '#dc2626', weight: 12 },
+  CASTIGO_MAXIMO: { name: 'CASTIGO MÁXIMO',  icon: '💥', color: '#991b1b', weight: 3, minGap: 15, minStart: 11 }   // minGap: mínimo de cartas entre dos de esta categoría
 };
 
 /* =====================================================================
@@ -890,7 +891,8 @@ class App {
     let use = fresh.length ? fresh : cats;
     if (use.length > 1 && g.lastCat) use = use.filter(k=>k!==g.lastCat);
     // separación mínima (p. ej. castigo máximo: como mucho uno cada 15 cartas)
-    const spaced = use.filter(k => !CATEGORIES[k]?.minGap || !g.lastIdx || g.lastIdx[k]==null || g.round - g.lastIdx[k] >= CATEGORIES[k].minGap);
+    const spaced = use.filter(k => (!CATEGORIES[k]?.minStart || g.round >= CATEGORIES[k].minStart) &&
+      (!CATEGORIES[k]?.minGap || !g.lastIdx || g.lastIdx[k]==null || g.round - g.lastIdx[k] >= CATEGORIES[k].minGap));
     if (spaced.length) use = spaced;
     const total = use.reduce((s,k)=>s+(CATEGORIES[k]?.weight||10),0);
     let r = Math.random()*total;
