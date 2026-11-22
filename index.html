@@ -458,7 +458,6 @@ const CARDS = [
   // ---------- RETO / OBSERVACIÓN (16) ----------
   { id:'rt1', cat:'RETO', title:'MISIÓN: RISA', text:'{J1} tiene 25 segundos para conseguir que {J2} sonría o se ría, sin tocarle ni contar un chiste.', time:25, penalty:'3 castigos a {J1} si no lo consigue' },
   { id:'rt2', cat:'RETO', title:'SONIDO DE ANIMAL', text:'El grupo elige un animal. Durante las próximas 3 cartas, {J1} tiene que hacer su sonido antes de hablar.', penalty:'2 castigos por cada olvido', rule:{ kind:'temp', rounds:3, text:'{J1}: sonido de animal antes de hablar' } },
-  { id:'rt3', cat:'RETO', title:'EL ESPEJO', text:'Durante las próximas 2 cartas, {J1} tiene que imitar todos los movimientos de {J2}.', penalty:'2 castigos a {J1} por cada fallo', rule:{ kind:'temp', rounds:2, text:'{J1} imita todos los movimientos de {J2}' } },
   { id:'rt4', cat:'RETO', title:'ELOGIO SINCERO', text:'{J1} tiene 30 segundos para decirle 3 piropos emotivos a {J2} mirándole a los ojos y sin reírse.', time:30, penalty:'3 castigos si {J1} se ríe' },
   { id:'rt16', cat:'RETO', title:'LENGUA DE SIGNOS', text:'{J1} se queda sin voz un minuto y se inventa su propia lengua de signos. Mira tu frase en secreto y transmítesela a {J2} solo con signos: sin hablar, sin escribir y sin señalar objetos.', mini:'frase', time:60, penalty:'3 castigos a los dos si {J2} no la adivina' },
   { id:'rt5', cat:'RETO', title:'LA MÍMICA', text:'{J1} tiene 30 segundos para que {J2} adivine una película solo con mímica.', time:30, penalty:'3 castigos a los dos si fallan' },
@@ -471,6 +470,7 @@ const CARDS = [
   { id:'rt12', cat:'RETO', title:'MIRADA FIJA', text:'{J1} y {J2} se sostienen la mirada 20 segundos sin pestañear ni sonreír.', time:20, penalty:'3 castigos al que pierda' },
   { id:'rt13', cat:'RETO', title:'EL POETA', text:'{J1} tiene 20 segundos para improvisarle a {J2} una rima de 4 versos.', time:20, penalty:'3 castigos a {J1} si no rima' },
   { id:'rt14', cat:'RETO', title:'CÁMARA LENTA', text:'Durante la próxima carta, {J1} hace todos sus movimientos a cámara lenta extrema.', penalty:'2 castigos si se mueve a velocidad normal', rule:{ kind:'temp', rounds:1, text:'{J1} se mueve a cámara lenta' } },
+  { id:'rt17', cat:'RETO', title:'SUMISO ABSOLUTO', text:'Durante las próximas 3 cartas, {J1} no puede decirle que no a nada que le pida {J2} (dentro de lo razonable).', penalty:'2 castigos a {J1} cada vez que diga que no', rule:{ kind:'temp', rounds:3, text:'{J1} no puede decirle que no a {J2}' } },
   { id:'rt15', cat:'RETO', title:'CONEXIÓN MENTAL', text:'A la de tres, {J1} y {J2} dicen una palabra cualquiera. En los siguientes intentos, cada uno dice una palabra que conecte las dos anteriores. Tienen 3 intentos para decir la misma.', penalty:'2 castigos a cada uno si no lo logran' },
 
   // ---------- CAOS (13) ----------
@@ -539,7 +539,6 @@ const CARDS = [
   { id:'vt21', cat:'VOTACION', title:'SIGILO', text:'A la de tres, señalad a quien creéis más capaz de cumplir sus misiones secretas sin que le pillen.', penalty:'2 castigos al más votado' },
 
   // ---------- VIRUS (15) ----------
-  { id:'vr1', cat:'VIRUS', title:'BARRERA COMUNICATIVA', text:'{J1} no puede hablarle ni responderle directamente a {J2}.', rule:{ kind:'virus', text:'{J1} no puede hablarle a {J2}' } },
   { id:'vr2', cat:'VIRUS', title:'IDIOMA OFICIAL', text:'Prohibido el español. Todo el grupo habla en INGLÉS.', participants:'TODOS', rule:{ kind:'virus', text:'Todos hablan en inglés' } },
   { id:'vr3', cat:'VIRUS', title:'MODO ACENTO', text:'{J1} habla con el acento que elija {J2}. Si no se os ocurre ninguno: acento {ACENTO}.', rule:{ kind:'virus', text:'{J1} habla con el acento que eligió {J2}' } },
   { id:'vr4', cat:'VIRUS', title:'INTERCAMBIO DE NOMBRES', text:'{J1} pasa a llamarse {J2} y viceversa. Quien les llame por su nombre real, pierde.', participants:'TODOS', rule:{ kind:'virus', text:'{J1} y {J2} se han cambiado el nombre' } },
@@ -547,11 +546,9 @@ const CARDS = [
   { id:'vr6', cat:'VIRUS', title:'CORTANOMBRES', text:'Prohibido decir nombres propios. Solo «oye tú», «colega» o «camarada».', participants:'TODOS', rule:{ kind:'virus', text:'Prohibido decir nombres propios' } },
   { id:'vr7', cat:'VIRUS', title:'PREGUNTAS CON PREGUNTA', text:'Si alguien le pregunta algo a {J1}, solo puede responder con otra pregunta.', rule:{ kind:'virus', text:'{J1} solo responde con preguntas' } },
   { id:'vr8', cat:'VIRUS', title:'Y OLÉ', text:'Todo el grupo tiene que acabar cada frase con «y olé».', participants:'TODOS', rule:{ kind:'virus', text:'Todos acaban las frases con «y olé»' } },
-  { id:'vr10', cat:'VIRUS', title:'SUMISO ABSOLUTO', text:'Durante las próximas 3 cartas, {J1} no puede decirle que no a nada que le pida {J2} (dentro de lo razonable).', rule:{ kind:'temp', rounds:3, text:'{J1} no puede decirle que no a {J2}' } },
   { id:'vr12', cat:'VIRUS', title:'PALABRA PROHIBIDA', text:'{J1} no puede decir «sí» ni «no».', rule:{ kind:'virus', text:'{J1} no puede decir «sí» ni «no»' } },
-  { id:'vr13', cat:'VIRUS', title:'GUARDAESPALDAS', text:'{J2} es el guardaespaldas de {J1}: cada vez que {J1} beba, {J2} bebe lo mismo.', rule:{ kind:'virus', text:'Cuando {J1} bebe, {J2} bebe lo mismo' } },
   { id:'vr15', cat:'VIRUS', title:'TODOS MIENTEN', text:'Prohibido decir la verdad. Mientras dure este virus, todo el mundo miente en todo lo que diga. Sí, el Asesino también.', participants:'TODOS', penalty:'2 castigos a quien le pillen diciendo la verdad', rule:{ kind:'virus', text:'Todos mienten: prohibido decir la verdad' } },
-  { id:'vr16', cat:'VIRUS', title:'TERCERA PERSONA', text:'{J1} solo puede hablar de sí mismo en tercera persona. Nada de «yo», «me» ni «mi»: en vez de «voy a por hielo», «{J1} va a por hielo».', penalty:'2 castigos por cada «yo» que se le escape', rule:{ kind:'virus', text:'{J1} habla de sí mismo en tercera persona' } },
+  { id:'vr16', cat:'VIRUS', title:'TERCERA PERSONA', text:'Todo el mundo habla de sí mismo en tercera persona. Nada de «yo», «me» ni «mi»: en vez de «voy a por hielo», «Pablo va a por hielo».', participants:'TODOS', penalty:'2 castigos por cada «yo» que se escape', rule:{ kind:'virus', text:'Todos hablan de sí mismos en tercera persona' } },
   { id:'vr17', cat:'VIRUS', title:'MULETILLAS PROHIBIDAS', text:'Nadie puede decir {MULETILLAS}. A ver cuánto aguantáis.', participants:'TODOS', penalty:'2 castigos cada vez que se escape una', rule:{ kind:'virus', text:'Nadie puede decir {MULETILLAS}' } },
   { id:'vr14', cat:'VIRUS', title:'RISA PROHIBIDA', text:'{J1} tiene prohibido reírse. Cada risa (aunque sea por la nariz) cuenta.', penalty:'2 castigos por cada risa', rule:{ kind:'virus', text:'{J1} no puede reírse' } },
 
