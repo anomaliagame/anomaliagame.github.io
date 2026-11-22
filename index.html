@@ -603,7 +603,7 @@ const CARDS = [
   { id:'vt32', cat:'VOTACION', title:'ANTECEDENTES', text:'A la de tres, señalad a quien acabaría en la cárcel antes de los 40.', penalty:'3 castigos al más votado' },
   { id:'vt21', cat:'VOTACION', title:'SIGILO', text:'A la de tres, señalad a quien creéis más capaz de cumplir sus misiones secretas sin que le pillen.', penalty:'2 castigos al más votado' },
 
-  // ---------- VIRUS (14) ----------
+  // ---------- VIRUS (15) ----------
   { id:'vr2', cat:'VIRUS', title:'IDIOMA OFICIAL', text:'Prohibido el español. Todo el grupo habla en INGLÉS.', participants:'TODOS', rule:{ kind:'virus', text:'Todos hablan en inglés' } },
   { id:'vr3', cat:'VIRUS', title:'MODO ACENTO', text:'{J1} habla con el acento que elija {J2}. Si no se os ocurre ninguno: acento {ACENTO}.', rule:{ kind:'virus', text:'{J1} habla con el acento que eligió {J2}' } },
   { id:'vr4', cat:'VIRUS', title:'INTERCAMBIO DE NOMBRES', text:'{J1} pasa a llamarse {J2} y viceversa. Quien les llame por su nombre real, pierde.', participants:'TODOS', rule:{ kind:'virus', text:'{J1} y {J2} se han cambiado el nombre' } },
@@ -617,6 +617,7 @@ const CARDS = [
   { id:'vr17', cat:'VIRUS', title:'MULETILLAS PROHIBIDAS', text:'Nadie puede decir {MULETILLAS}. A ver cuánto aguantáis.', participants:'TODOS', penalty:'2 castigos cada vez que se escape una', rule:{ kind:'virus', text:'Nadie puede decir {MULETILLAS}' } },
   { id:'vr18', cat:'VIRUS', title:'TODO EN DIMINUTIVO', text:'Todo el mundo habla en diminutivo: «¿me pasas el vasito, tiito?». Cada palabra que se pueda, con -ito o -ita.', participants:'TODOS', penalty:'2 castigos a quien se le olvide', rule:{ kind:'virus', text:'Todos hablan en diminutivo' } },
   { id:'vr19', cat:'VIRUS', title:'PIJOS DE MADRID', text:'Todo el mundo habla como un pijo o una pija de Madrid: «o sea, tía, literal, es que me muero». Quien hable normal, bebe.', participants:'TODOS', penalty:'2 castigos a quien se le escape el acento normal', rule:{ kind:'virus', text:'Todos hablan como pijos de Madrid' } },
+  { id:'vr20', cat:'VIRUS', title:'LA NORMA 👑', text:'{J1} se inventa una norma que tiene que cumplir todo el mundo («prohibido decir vale», «antes de beber hay que decir ¡por Iker!», «nadie puede tocarse la cara»…). Escríbela abajo y se queda en las reglas activas.', mini:'norma', participants:'TODOS', penalty:'2 castigos a quien la incumpla', rule:{ kind:'virus', text:'👑 Norma de {J1}: (escríbela en la carta)' } },
   { id:'vr14', cat:'VIRUS', title:'RISA PROHIBIDA', text:'{J1} tiene prohibido reírse. Cada risa (aunque sea por la nariz) cuenta.', penalty:'2 castigos por cada risa', rule:{ kind:'virus', text:'{J1} no puede reírse' } },
 
   // ---------- CASTIGO MÁXIMO (9) ----------
@@ -912,7 +913,7 @@ class App {
 
     if (card.rule) {
       if (card.rule.kind==='virus') {
-        g.rules.push({ kind:'virus', text:card.rule.text });
+        g.rules.push({ kind:'virus', text:card.rule.text, round:g.round });
         g.stats.virus++;
         const v = g.rules.filter(r=>r.kind==='virus');
         if (v.length > CONFIG.MAX_VIRUS) { const oldest = v[0]; g.rules.splice(g.rules.indexOf(oldest),1); }
@@ -1084,6 +1085,12 @@ class App {
     const c = this.game.current;
     if (!this.mini) {
       if (c.mini==='frase'){ this.mini={ type:'frase', open:false, text:this.nextPhrase() }; return this.renderFrase(); }
+      if (c.mini==='norma'){
+        $('c-mini').innerHTML = c.norma
+          ? `<div class="mini" style="text-align:center"><div class="small muted">La norma de ${esc(c.j1)}:</div><div style="font-size:1.3rem;font-weight:800;color:var(--amber)">«${esc(c.norma)}»</div><button class="btn btn-sm" onclick="app.writeNorma()">✏️ Cambiarla</button></div>`
+          : `<div class="mini"><button class="btn btn-primary" style="padding:18px" onclick="app.writeNorma()">✍️ ${esc(c.j1)}, escribe tu norma</button></div>`;
+        return;
+      }
       if (c.mini==='tabu'){ this.mini={ type:'tabu', open:false, item:this.nextFrom(TABOO,'usedTaboo') }; return this.renderTabu(); }
       if (c.mini==='cuanto'){ this.mini={ type:'cuanto', open:false, item:this.nextFrom(HOW_MANY,'usedHowMany') }; return this.renderCuanto(); }
       if (c.mini==='quiensoy'){ $('c-mini').innerHTML = `<div class="mini"><button class="btn btn-purple" style="padding:18px" onclick="app.whoAmI()">📱 ${esc(c.j1)}, ponte el móvil en la frente y pulsa</button></div>`; return; }
@@ -1112,6 +1119,15 @@ class App {
     },800);
   }
   // Lengua de signos: frase privada
+  async writeNorma(){
+    const g=this.game, c=g.current;
+    const txt = await ui.prompt(`${esc(c.j1)}, ¿cuál es tu norma? Tiene que cumplirla todo el mundo.`, 'Ej: antes de beber hay que decir «¡por Iker!»');
+    if (!txt) return;
+    c.norma = txt.slice(0,120);
+    const r = g.rules.find(x=>x.kind==='virus' && x.round===g.round);
+    if (r) r.text = `👑 Norma de ${c.j1}: ${c.norma}`;
+    this.save(); this.renderGame();
+  }
   nextFrom(list, key){
     const g=this.game; g[key]=g[key]||[];
     let free=list.map((x,i)=>i).filter(i=>!g[key].includes(i));
