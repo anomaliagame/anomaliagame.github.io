@@ -386,6 +386,55 @@ const PHRASES = ['Mi abuela tiene un tatuaje en el culo','Ayer me comí una pizz
   'Las palomas me persiguen desde pequeño','Me tocó la lotería y me la gasté en chicles','Mi abuelo liga más que yo en Tinder',
   'Se me ha caído el móvil al váter otra vez','Este sábado empiezo clases de ballet','Por favor, que alguien me rasque la espalda'];
 const FILLERS = ['tío / tía','en plan','vale','o sea','literal','bro','qué fuerte','buah','venga','mazo','rollo','nada','bueno','joder','hostia','eh','guay','flipar','típico','total'];
+// ¿Cuánto?: preguntas con respuesta numérica (datos estables)
+const HOW_MANY = [
+  ['¿Cuántos huesos tiene el cuerpo de un adulto?','206'],
+  ['¿Cuántos países hay en la Unión Europea?','27'],
+  ['¿Cuántas teclas tiene un piano normal?','88'],
+  ['¿Cuántos metros mide el Everest?','8.849 m'],
+  ['¿Cuántos dientes tiene un adulto, contando las muelas del juicio?','32'],
+  ['¿Cuántos corazones tiene un pulpo?','3'],
+  ['¿Cuántas provincias tiene España?','50'],
+  ['¿Cuántas comunidades autónomas tiene España?','17 (más Ceuta y Melilla)'],
+  ['¿En qué año se inauguró el metro de Madrid?','1919'],
+  ['¿Cuántos kilómetros tiene una maratón?','42,195 km'],
+  ['¿Cuántos kilómetros por segundo recorre la luz (más o menos)?','Unos 300.000 km/s'],
+  ['¿Cuántos litros de sangre tiene un adulto (más o menos)?','Unos 5 litros'],
+  ['¿Cuántos Mundiales de fútbol ha ganado Brasil?','5'],
+  ['¿En qué año llegó el ser humano a la Luna?','1969'],
+  ['¿Cuántas estrellas tiene la bandera de Estados Unidos?','50'],
+  ['¿Cuántos ojos tiene una araña normalmente?','8'],
+  ['¿Cuántas casillas tiene un tablero de ajedrez?','64'],
+  ['¿Cuántas cartas tiene una baraja española de las normales?','40'],
+  ['¿En qué año empezó la Guerra Civil española?','1936'],
+  ['¿Cuántos metros mide la Torre Eiffel (más o menos)?','Unos 330 m'],
+  ['¿Cuántos segundos tiene un día?','86.400'],
+  ['¿En qué año cayó el Muro de Berlín?','1989'],
+  ['¿Cuántas islas principales tiene Canarias?','8'],
+  ['¿Cuántos años vivió Cervantes?','68 (1547-1616)'],
+  ['¿Cuántos kilómetros de diámetro tiene la Tierra (más o menos)?','Unos 12.742 km'],
+  ['¿Cuántos jugadores tiene en el campo un equipo de rugby?','15'],
+  ['¿Cuántos minutos dura un partido de baloncesto de la NBA (sin prórroga)?','48'],
+  ['¿Cuántos grados tiene un triángulo sumando sus ángulos?','180'],
+  ['¿En qué año descubrió Colón América?','1492'],
+  ['¿Cuántas cuerdas tiene una guitarra española?','6']
+];
+// ¿Quién soy?
+const WHO_AM_I = ['Shakira','Messi','Cristiano Ronaldo','Rosalía','Bad Bunny','Rafa Nadal','Fernando Alonso','Ibai Llanos','Belén Esteban','Torrente',
+  'Bob Esponja','Shrek','Harry Potter','Darth Vader','Spider-Man','Super Mario','Pikachu','Homer Simpson','Batman','El Papa',
+  'Napoleón','Cleopatra','Einstein','Michael Jackson','Julio Iglesias','Isabel Pantoja','Chiquito de la Calzada','David Broncano','Jordi Hurtado','Papá Noel',
+  'Cristóbal Colón','Don Quijote','Dora la Exploradora','Elsa de Frozen','El Coyote','Mr. Bean','Gandalf','Pablo Motos','Pedro Picapiedra','Aitana'];
+// Tabú: [palabra, prohibidas]
+const TABOO = [
+  ['PLAYA',['arena','mar','verano']],['RESACA',['beber','cabeza','mañana']],['NOVIA',['pareja','novio','amor']],['MÓVIL',['teléfono','llamar','pantalla']],
+  ['DISCOTECA',['bailar','música','noche']],['PIZZA',['Italia','queso','masa']],['FÚTBOL',['balón','gol','partido']],['GATO',['miau','animal','perro']],
+  ['TORTILLA',['patata','huevo','cebolla']],['NAVIDAD',['diciembre','regalos','Papá Noel']],['AVIÓN',['volar','aeropuerto','piloto']],['DUCHA',['agua','baño','jabón']],
+  ['EXAMEN',['estudiar','nota','aprobar']],['CERVEZA',['caña','beber','bar']],['DORMIR',['cama','sueño','noche']],['HOSPITAL',['médico','enfermo','urgencias']],
+  ['INSTAGRAM',['foto','red social','stories']],['BODA',['casarse','novia','iglesia']],['PERRO',['guau','mascota','animal']],['DINERO',['euros','pagar','banco']],
+  ['VERANO',['calor','vacaciones','playa']],['COCHE',['conducir','ruedas','carnet']],['LLUVIA',['agua','paraguas','nube']],['PELÍCULA',['cine','ver','actor']],
+  ['CUMPLEAÑOS',['tarta','años','velas']],['GIMNASIO',['pesas','músculo','entrenar']],['TATUAJE',['tinta','piel','aguja']],['EX',['pareja','antes','novio']],
+  ['TINDER',['ligar','app','match']],['KEBAB',['comida','carne','noche']]
+];
 const ACCENTS = ['andaluz','argentino','mexicano','ruso','francés','pijo','gallego','italiano','canario','vasco cerrado','alemán','de telenovela'];
 const LETTERS = ['A','E','O','I','R','S','L','N'];
 const CULT_WORDS = ['Sustancialmente','Glicerina','Fluvial','Epílogo','Petricor','Inefable','Ubicuidad','Soslayar','Efímero','Cándido',
@@ -434,7 +483,7 @@ const ROASTS_CAUGHT = [
 
 // Cartas. Campos: id, cat, title, text, penalty, time (s), rule {kind:'virus'|'temp', rounds, text}, mini, hot, participants
 const CARDS = [
-  // ---------- YO NUNCA (20) ----------
+  // ---------- YO NUNCA (27) ----------
   { id:'yn1', cat:'YO_NUNCA', title:'BAÑO PÚBLICO', text:'Yo nunca he tenido que hacer mis necesidades en un baño público asqueroso por una emergencia.', penalty:'2 castigos los que SÍ' },
   { id:'yn2', cat:'YO_NUNCA', title:'MONTE SALVAJE', text:'Yo nunca he tenido que cagar en el monte o en mitad de la naturaleza.', penalty:'2 castigos los que SÍ' },
   { id:'yn3', cat:'YO_NUNCA', title:'ACCIDENTE', text:'Yo nunca he vomitado encima de alguien o he hecho que alguien vomite.', penalty:'3 castigos los que SÍ' },
@@ -455,8 +504,15 @@ const CARDS = [
   { id:'yn18', cat:'YO_NUNCA', title:'COMIDA AJENA', text:'Yo nunca me he comido la comida de un compañero de piso o familiar y le he echado la culpa a otro.', penalty:'2 castigos los que SÍ' },
   { id:'yn19', cat:'YO_NUNCA', title:'PRIMERA IMPRESIÓN', text:'Yo nunca he juzgado mal a alguien de este grupo antes de conocerle bien.', penalty:'2 castigos los que SÍ' },
   { id:'yn20', cat:'YO_NUNCA', title:'TERRITORIO PROHIBIDO', text:'Yo nunca le he tirado la caña al ex o al rollo de un amigo.', penalty:'3 castigos los que SÍ' },
+  { id:'yn21', cat:'YO_NUNCA', title:'¿DÓNDE ESTOY?', text:'Yo nunca me he despertado sin saber dónde estaba.', penalty:'2 castigos los que SÍ' },
+  { id:'yn22', cat:'YO_NUNCA', title:'YA ESTOY LLEGANDO', text:'Yo nunca he dicho «ya estoy llegando» estando todavía en la ducha.', penalty:'2 castigos los que SÍ' },
+  { id:'yn23', cat:'YO_NUNCA', title:'LIKE ARQUEOLÓGICO', text:'Yo nunca he dado like sin querer a una foto de hace años mientras cotilleaba a alguien.', penalty:'2 castigos los que SÍ' },
+  { id:'yn24', cat:'YO_NUNCA', title:'POR LA CARA', text:'Yo nunca me he colado en un concierto, un tren o una discoteca sin pagar.', penalty:'2 castigos los que SÍ' },
+  { id:'yn25', cat:'YO_NUNCA', title:'EDAD FALSA', text:'Yo nunca he mentido sobre mi edad para entrar en algún sitio.', penalty:'2 castigos los que SÍ' },
+  { id:'yn26', cat:'YO_NUNCA', title:'LA PISCINA', text:'Yo nunca he meado en una piscina.', penalty:'2 castigos los que SÍ' },
+  { id:'yn27', cat:'YO_NUNCA', title:'¿CÓMO TE LLAMABAS?', text:'Yo nunca me he liado con alguien y no me he acordado de su nombre al día siguiente.', penalty:'3 castigos los que SÍ' },
 
-  // ---------- RETO / OBSERVACIÓN (16) ----------
+  // ---------- RETO / OBSERVACIÓN (20) ----------
   { id:'rt1', cat:'RETO', title:'MISIÓN: RISA', text:'{J1} tiene 25 segundos para conseguir que {J2} sonría o se ría, sin tocarle ni contar un chiste.', time:25, penalty:'3 castigos a {J1} si no lo consigue' },
   { id:'rt2', cat:'RETO', title:'SONIDO DE ANIMAL', text:'El grupo elige un animal. Durante las próximas 3 cartas, {J1} tiene que hacer su sonido antes de hablar.', penalty:'2 castigos por cada olvido', rule:{ kind:'temp', rounds:3, text:'{J1}: sonido de animal antes de hablar' } },
   { id:'rt4', cat:'RETO', title:'ELOGIO SINCERO', text:'{J1} tiene 30 segundos para decirle 3 piropos emotivos a {J2} mirándole a los ojos y sin reírse.', time:30, penalty:'3 castigos si {J1} se ríe' },
@@ -471,25 +527,34 @@ const CARDS = [
   { id:'rt13', cat:'RETO', title:'EL POETA', text:'{J1} tiene 20 segundos para improvisarle a {J2} una rima de 4 versos.', time:20, penalty:'3 castigos a {J1} si no rima' },
   { id:'rt14', cat:'RETO', title:'CÁMARA LENTA', text:'Durante la próxima carta, {J1} hace todos sus movimientos a cámara lenta extrema.', penalty:'2 castigos si se mueve a velocidad normal', rule:{ kind:'temp', rounds:1, text:'{J1} se mueve a cámara lenta' } },
   { id:'rt17', cat:'RETO', title:'SUMISO ABSOLUTO', text:'Durante las próximas 3 cartas, {J1} no puede decirle que no a nada que le pida {J2} (dentro de lo razonable).', penalty:'2 castigos a {J1} cada vez que diga que no', rule:{ kind:'temp', rounds:3, text:'{J1} no puede decirle que no a {J2}' } },
+  { id:'rt20', cat:'RETO', title:'EL IMITADOR', text:'{J1} imita durante 20 segundos a alguien del grupo, sin decir a quién. Si el grupo lo adivina, bebe el imitado. Si no, bebe {J1}.', time:20, penalty:'2 castigos al imitado (o 3 a {J1} si nadie lo adivina)' },
+  { id:'rt21', cat:'RETO', title:'ABECEDARIO AL REVÉS', text:'{J1} tiene 20 segundos para decir el abecedario al revés, de la Z a la A, sin equivocarse. Test de sobriedad oficial.', time:20, penalty:'3 castigos a {J1} si falla' },
+  { id:'rt22', cat:'RETO', title:'EL MONÓLOGO', text:'El grupo elige un tema absurdo (las palomas, los calcetines, el Mercadona…). {J1} habla 30 segundos sobre él sin parar y sin decir «eh».', time:30, penalty:'3 castigos a {J1} si se para o dice «eh»' },
+  { id:'rt23', cat:'RETO', title:'DECLARACIÓN DE PELI', text:'{J1} se pone de rodillas y se declara a {J2} como en una comedia romántica, durante 20 segundos y sin reírse.', time:20, penalty:'3 castigos a {J1} si se ríe' },
+  { id:'rt24', cat:'RETO', title:'SECRETO O TRAGO', text:'{J1} cuenta algo que nunca le haya contado a este grupo. Si el grupo cree que no vale (o que ya lo sabían), bebe.', penalty:'3 castigos a {J1} si no lo cuenta o no cuela' },
   { id:'rt15', cat:'RETO', title:'CONEXIÓN MENTAL', text:'A la de tres, {J1} y {J2} dicen una palabra cualquiera. En los siguientes intentos, cada uno dice una palabra que conecte las dos anteriores. Tienen 3 intentos para decir la misma.', penalty:'2 castigos a cada uno si no lo logran' },
 
-  // ---------- CAOS (13) ----------
-  { id:'cs1', cat:'CAOS', title:'CAMBIO TOTAL', text:'¡Todos cambiad de sitio AHORA MISMO! El último en sentarse pierde.', penalty:'3 castigos al más lento' },
+  // ---------- CAOS (17) ----------
+  { id:'cs1', cat:'CAOS', mini:'reaccion', title:'CAMBIO TOTAL', text:'¡Todos cambiad de sitio AHORA MISMO! El último en sentarse pierde.', penalty:'3 castigos al más lento' },
   { id:'cs2', cat:'CAOS', title:'CUENTA ATRÁS', text:'El grupo cuenta del 1 al 10 en voz alta, una persona por número y sin orden fijo. Si dos hablan a la vez, se vuelve a empezar.', time:30, penalty:'2 castigos a los que choquen' },
   { id:'cs3', cat:'CAOS', title:'CANCIÓN EN CADENA', text:'{J1} canta el primer verso de una canción. El de su derecha sigue con el siguiente, y así en orden. Quien se trabe o no se sepa la letra, pierde.', penalty:'3 castigos al que falle' },
   { id:'cs4', cat:'CAOS', title:'LA LETRA MALDITA', text:'La letra maldita es la «{LETRA}». Cada uno cuenta cuántas veces sale en su nombre y primer apellido. El de su izquierda bebe esa cantidad.', penalty:'Lo que diga la letra (puede ser 0)' },
   { id:'cs5', cat:'CAOS', title:'CADENA DE PALABRAS', text:'{J1} dice una palabra. El de su derecha la repite y añade otra, y así formando una frase cada vez más larga. Quien se equivoque o dude más de 3 segundos, pierde.', penalty:'3 castigos al que falle' },
-  { id:'cs6', cat:'CAOS', title:'MANO CON MANO', text:'¡Todos juntad la mano con la de la persona de vuestra izquierda AHORA! La última pareja en hacerlo, pierde.', penalty:'2 castigos a la última pareja' },
+  { id:'cs6', cat:'CAOS', mini:'reaccion', title:'MANO CON MANO', text:'¡Todos juntad la mano con la de la persona de vuestra izquierda AHORA! La última pareja en hacerlo, pierde.', penalty:'2 castigos a la última pareja' },
   { id:'cs7', cat:'CAOS', title:'RITMO EN LA MESA', text:'{J1} marca un ritmo con golpes en la mesa. Uno a uno, en sentido horario, todos lo repiten. Quien pierda el compás, pierde.', penalty:'2 castigos al que falle' },
   { id:'cs8', cat:'CAOS', title:'CATEGORÍAS RELÁMPAGO', text:'{J1} dice una categoría (marcas de cerveza, futbolistas…). En orden, cada uno dice algo de esa categoría. Quien repita o tarde más de 3 segundos, pierde.', penalty:'3 castigos al que falle' },
-  { id:'cs9', cat:'CAOS', title:'EL SUELO ES LAVA', text:'¡El suelo es lava! Tenéis 5 segundos para subiros DE PIE encima de algo (silla, sofá, banco…). Sentado no vale. El último en estar arriba, pierde.', time:5, penalty:'3 castigos al último' },
+  { id:'cs9', cat:'CAOS', mini:'reaccion', title:'EL SUELO ES LAVA', text:'¡El suelo es lava! Tenéis 5 segundos para subiros DE PIE encima de algo (silla, sofá, banco…). Sentado no vale. El último en estar arriba, pierde.', time:5, penalty:'3 castigos al último' },
 
   { id:'cs10', cat:'CAOS', title:'EL PULGAR', text:'Durante las próximas 3 cartas, cuando {J1} quiera, pondrá disimuladamente el pulgar sobre la mesa. Los demás tienen que copiarle en cuanto se den cuenta. El último en hacerlo, pierde.', penalty:'2 castigos al último cada vez', rule:{ kind:'temp', rounds:3, text:'Pulgar en la mesa: si {J1} lo pone, todos le copian' } },
   { id:'cs11', cat:'CAOS', title:'ENCADENADOS', text:'{J1} dice una palabra. En orden, cada uno dice otra que empiece por la última letra de la anterior. Quien repita, se atasque o tarde más de 3 segundos, pierde.', penalty:'3 castigos al que falle' },
   { id:'cs12', cat:'CAOS', title:'TELÉFONO ESCACHARRADO', text:'{J1} le susurra una frase al de su derecha, y así de oreja en oreja. Al final, cada uno dice en voz alta, en orden, lo que oyó. Pierde quien más la cambió al pasarla.', penalty:'3 castigos al que más la cambió' },
   { id:'cs13', cat:'CAOS', title:'PIEDRA, PAPEL O TIJERA EN CADENA', text:'Todos a la vez, cada uno contra el de su derecha: ¡piedra, papel o tijera! Los empates repiten.', penalty:'2 castigos a cada uno que pierda' },
+  { id:'cs14', cat:'CAOS', title:'BATERÍA BAJA', text:'Todos sacad el móvil y enseñad el porcentaje de batería. El que menos tenga, bebe. Si hay empate, beben todos los empatados.', penalty:'3 castigos al de menos batería' },
+  { id:'cs15', cat:'CAOS', title:'DEDOS A LA VEZ', text:'A la de tres, todos sacáis a la vez una mano con 1 a 5 dedos. Los que coincidáis en número con alguien, bebéis.', penalty:'2 castigos a cada uno que coincida' },
+  { id:'cs16', cat:'CAOS', title:'¡TOCA ALGO {COLOR}!', mini:'reaccion', text:'¡Tocad algo {COLOR} que NO sea vuestro! El último en conseguirlo, pierde.', penalty:'3 castigos al último' },
+  { id:'cs17', cat:'CAOS', title:'SIMÓN DICE', text:'{J1} es Simón y da 5 órdenes seguidas. Solo hay que obedecer las que empiecen por «Simón dice…». El que falle una, bebe.', penalty:'2 castigos por cada fallo' },
 
-  // ---------- MINIJUEGOS (12) ----------
+  // ---------- MINIJUEGOS (15) ----------
   { id:'mj1', cat:'MINIJUEGO', title:'PAM PUM PIM', text:'{J1} empieza una ronda de Pam Pum Pim. Ya sabéis jugar.', penalty:'3 castigos al que falle' },
   { id:'mj2', cat:'MINIJUEGO', title:'EL PEAJE 🃏', text:'Con baraja real. {J2} reparte: 4 cartas boca arriba en fila y una boca abajo en horizontal entre la 2ª y la 3ª (el peaje). {J1} dice «mayor» o «menor» que la 1ª; {J2} saca carta del mazo y la pone encima. Si acierta, pasa a la siguiente. Si falla, bebe y vuelve a empezar desde la 1ª, con las cartas que hayan quedado encima. No termina hasta acertar las 4 seguidas.', participants:'{J1} (reparte {J2})', penalty:'Fallo en la 1ª: 1 · 2ª: 2 · 3ª: 3 · 4ª: 4. Si sale la misma carta, el doble. Pasar el peaje: 1 siempre' },
   { id:'mj3', cat:'MINIJUEGO', title:'MANOS RÁPIDAS 🃏', text:'Con baraja real. Poned un objeto en el centro de la mesa. En cada ronda se reparte una carta a cada uno y la levantáis a la vez. Si dos o más tenéis el mismo número, ¡a por el objeto! Quien lo coja gana; los otros de esa coincidencia pierden. 5 rondas (3 si sois más de 6).', participants:'TODOS', penalty:'2 castigos a quien no coja el objeto' },
@@ -501,6 +566,9 @@ const CARDS = [
   { id:'mj10', cat:'MINIJUEGO', title:'¿QUÉ PREFIERES?', text:'{J1} se inventa un «¿qué prefieres…?» con dos opciones. A la de tres, todos votan a la vez (una mano o dos dedos). Pierde el bando que quede en minoría.', penalty:'2 castigos a cada uno de la minoría (empate: nadie)' },
   { id:'mj12', cat:'MINIJUEGO', title:'CRONÓMETRO A CIEGAS', text:'La app dice un número de segundos. Por turnos, cada uno coge el móvil, cierra los ojos, pulsa para empezar y pulsa otra vez cuando crea que han pasado. En cada ronda cae la mitad que más se aleje, hasta que quede un ganador.', mini:'crono', participants:'TODOS', penalty:'Caes en la 1ª ronda: 3 · en la 2ª: 2 · después: 1. El ganador reparte 3' },
   { id:'mj11', cat:'MINIJUEGO', title:'LA RULETA', text:'La app gira la ruleta y elige una víctima al azar. Sin trampa ni cartón.', mini:'ruleta', participants:'TODOS', penalty:'3 castigos a la víctima' },
+  { id:'mj13', cat:'MINIJUEGO', title:'¿CUÁNTO?', text:'La app hace una pregunta con número. Cada uno dice su cifra en voz alta (nadie puede repetir la de otro). Luego se descubre la respuesta: el que más se aleje, bebe.', mini:'cuanto', participants:'TODOS', penalty:'3 castigos al que más se aleje' },
+  { id:'mj14', cat:'MINIJUEGO', title:'¿QUIÉN SOY?', text:'{J1} se pone el móvil en la frente sin mirarlo: en la pantalla sale un personaje que ve todo el mundo menos él. Tiene 60 segundos para adivinarlo haciendo preguntas de sí o no. El grupo solo puede responder «sí» o «no».', mini:'quiensoy', penalty:'3 castigos a {J1} si no lo adivina' },
+  { id:'mj15', cat:'MINIJUEGO', title:'TABÚ', text:'{J1} mira en secreto su palabra y las 3 prohibidas. Tiene 60 segundos para que {J2} la adivine sin decir ninguna de esas palabras (ni la palabra misma).', mini:'tabu', time:60, penalty:'2 castigos a cada uno si no la adivina o se dice una prohibida' },
   { id:'mj8', cat:'MINIJUEGO', title:'CARA O CRUZ', text:'{J1} elige cara o cruz contra {J2}. Lanzad una moneda de verdad.', penalty:'3 castigos al que pierda' },
 
   // ---------- VOTACIÓN (33) ----------
@@ -538,7 +606,7 @@ const CARDS = [
   { id:'vt33', cat:'VOTACION', title:'NADIE TE BUSCA', text:'A la de tres, señalad a quien podría desaparecer una semana sin que nadie fuera a buscarle.', penalty:'3 castigos al más votado' },
   { id:'vt21', cat:'VOTACION', title:'SIGILO', text:'A la de tres, señalad a quien creéis más capaz de cumplir sus misiones secretas sin que le pillen.', penalty:'2 castigos al más votado' },
 
-  // ---------- VIRUS (15) ----------
+  // ---------- VIRUS (14) ----------
   { id:'vr2', cat:'VIRUS', title:'IDIOMA OFICIAL', text:'Prohibido el español. Todo el grupo habla en INGLÉS.', participants:'TODOS', rule:{ kind:'virus', text:'Todos hablan en inglés' } },
   { id:'vr3', cat:'VIRUS', title:'MODO ACENTO', text:'{J1} habla con el acento que elija {J2}. Si no se os ocurre ninguno: acento {ACENTO}.', rule:{ kind:'virus', text:'{J1} habla con el acento que eligió {J2}' } },
   { id:'vr4', cat:'VIRUS', title:'INTERCAMBIO DE NOMBRES', text:'{J1} pasa a llamarse {J2} y viceversa. Quien les llame por su nombre real, pierde.', participants:'TODOS', rule:{ kind:'virus', text:'{J1} y {J2} se han cambiado el nombre' } },
@@ -550,6 +618,8 @@ const CARDS = [
   { id:'vr15', cat:'VIRUS', title:'TODOS MIENTEN', text:'Prohibido decir la verdad. Mientras dure este virus, todo el mundo miente en todo lo que diga. Sí, el Asesino también.', participants:'TODOS', penalty:'2 castigos a quien le pillen diciendo la verdad', rule:{ kind:'virus', text:'Todos mienten: prohibido decir la verdad' } },
   { id:'vr16', cat:'VIRUS', title:'TERCERA PERSONA', text:'Todo el mundo habla de sí mismo en tercera persona. Nada de «yo», «me» ni «mi»: en vez de «voy a por hielo», «Pablo va a por hielo».', participants:'TODOS', penalty:'2 castigos por cada «yo» que se escape', rule:{ kind:'virus', text:'Todos hablan de sí mismos en tercera persona' } },
   { id:'vr17', cat:'VIRUS', title:'MULETILLAS PROHIBIDAS', text:'Nadie puede decir {MULETILLAS}. A ver cuánto aguantáis.', participants:'TODOS', penalty:'2 castigos cada vez que se escape una', rule:{ kind:'virus', text:'Nadie puede decir {MULETILLAS}' } },
+  { id:'vr18', cat:'VIRUS', title:'TODO EN DIMINUTIVO', text:'Todo el mundo habla en diminutivo: «¿me pasas el vasito, tiito?». Cada palabra que se pueda, con -ito o -ita.', participants:'TODOS', penalty:'2 castigos a quien se le olvide', rule:{ kind:'virus', text:'Todos hablan en diminutivo' } },
+  { id:'vr19', cat:'VIRUS', title:'PIJOS DE MADRID', text:'Todo el mundo habla como un pijo o una pija de Madrid: «o sea, tía, literal, es que me muero». Quien hable normal, bebe.', participants:'TODOS', penalty:'2 castigos a quien se le escape el acento normal', rule:{ kind:'virus', text:'Todos hablan como pijos de Madrid' } },
   { id:'vr14', cat:'VIRUS', title:'RISA PROHIBIDA', text:'{J1} tiene prohibido reírse. Cada risa (aunque sea por la nariz) cuenta.', penalty:'2 castigos por cada risa', rule:{ kind:'virus', text:'{J1} no puede reírse' } },
 
   // ---------- CASTIGO MÁXIMO (9) ----------
@@ -870,7 +940,12 @@ class App {
     try{ navigator.vibrate && navigator.vibrate([400,100,400]); }catch(e){}
     $('bomb').classList.add('active');
   }
-  closeBomb(){ $('bomb').classList.remove('active'); }
+  closeBomb(){
+    clearInterval(this._whoTimer);
+    const el=$('bomb'); el.classList.remove('active'); el.style.animation=''; el.style.background='';
+    el.innerHTML='<div style="font-size:7rem">💥</div><h1 style="font-size:2.6rem">¡BOOM!</h1><p style="font-size:1.2rem;font-weight:700">¡Hinchad los mofletes!<br>El último bebe 3.</p><p class="small" style="opacity:.8;margin-top:20px">Toca para cerrar</p>';
+    if (this.screen==='game') this.renderGame();
+  }
 
   pool(){
     const all = [...CARDS, ...this.settings.customCards];
@@ -925,13 +1000,13 @@ class App {
     const blob = raw.text + (raw.penalty||'') + (raw.rule?.text||'') + (raw.participants||'');
     const needs = blob.includes('{J2}') ? 2 : (blob.includes('{J1}') ? 1 : 0);
     const [j1,j2] = needs ? this.pickPlayers(needs) : [];
-    const accent = rnd(ACCENTS), letter = rnd(LETTERS);
+    const accent = rnd(ACCENTS), letter = rnd(LETTERS), color = rnd(['AZUL','ROJO','NEGRO','BLANCO','VERDE','AMARILLO','DE METAL','DE MADERA']);
     const fillers = shuffle(FILLERS).slice(0,2).map(w=>`«${w}»`).join(' ni ');
-    const fill = s => String(s||'').replace(/\{MULETILLAS\}/g,fillers).replace(/\{J1\}/g,j1||'').replace(/\{J2\}/g,j2||'').replace(/\{ACENTO\}/g,accent).replace(/\{LETRA\}/g,letter);
+    const fill = s => String(s||'').replace(/\{MULETILLAS\}/g,fillers).replace(/\{J1\}/g,j1||'').replace(/\{J2\}/g,j2||'').replace(/\{ACENTO\}/g,accent).replace(/\{LETRA\}/g,letter).replace(/\{COLOR\}/g,color);
     let part = raw.participants ? fill(raw.participants) : (needs===2 ? `${j1} + ${j2}` : needs===1 ? j1 : 'TODOS');
     let pen = raw.penalty ? fill(raw.penalty) : (raw.rule ? 'Incumplirla: 2 castigos' : '2 castigos');
     return {
-      id: raw.id, cat, title: raw.title, text: fill(raw.text), rawText: raw.text,
+      id: raw.id, cat, title: fill(raw.title), text: fill(raw.text), rawText: raw.text,
       participants: part, penalty: pen, time: raw.time||null, mini: raw.mini||null,
       j1, j2, rule: raw.rule ? { kind: raw.rule.kind, rounds: raw.rule.rounds, text: fill(raw.rule.text) } : null,
       hot: !!raw.hot
@@ -946,8 +1021,9 @@ class App {
     $('c-badge').textContent = `${cat.icon} ${cat.name}${c.hot?' 🔥':''}`;
     $('c-badge').style.background = cat.color;
     $('game-card').style.borderColor = cat.color + '88';
-    $('c-title').textContent = c.title;
-    $('c-text').textContent = c.text;
+    const hidden = c.mini==='reaccion' && !c.revealed;
+    $('c-title').textContent = hidden ? '⚡ CARTA DE REACCIÓN' : c.title;
+    $('c-text').textContent = hidden ? 'Nadie sabe lo que hay que hacer, ni siquiera quien lleva el móvil. Gira la pantalla hacia la mesa para que la vea todo el mundo y pulsa el botón: saldrá a la vez para todos.' : c.text;
     $('c-part').textContent = c.participants;
     $('c-pen').textContent = c.penalty;
     if (animate){ const gc=$('game-card'); gc.style.animation='none'; void gc.offsetWidth; gc.style.animation=''; }
@@ -1011,13 +1087,64 @@ class App {
     const c = this.game.current;
     if (!this.mini) {
       if (c.mini==='frase'){ this.mini={ type:'frase', open:false, text:this.nextPhrase() }; return this.renderFrase(); }
+      if (c.mini==='tabu'){ this.mini={ type:'tabu', open:false, item:this.nextFrom(TABOO,'usedTaboo') }; return this.renderTabu(); }
+      if (c.mini==='cuanto'){ this.mini={ type:'cuanto', open:false, item:this.nextFrom(HOW_MANY,'usedHowMany') }; return this.renderCuanto(); }
+      if (c.mini==='quiensoy'){ $('c-mini').innerHTML = `<div class="mini"><button class="btn btn-purple" style="padding:18px" onclick="app.whoAmI()">📱 ${esc(c.j1)}, ponte el móvil en la frente y pulsa</button></div>`; return; }
+      if (c.mini==='reaccion'){ if (c.revealed) return; $('c-mini').innerHTML = `<div class="mini"><button class="btn btn-danger" style="padding:20px;font-size:1.2rem" onclick="app.reaction()">📢 ¡Enseñar a todos! (3, 2, 1…)</button></div>`; return; }
       const label = { ruleta:'🎰 Girar la ruleta', crono:'⏱️ Empezar cronómetro a ciegas' }[c.mini];
       $('c-mini').innerHTML = `<div class="mini"><button class="btn btn-primary" onclick="app.startMini()">${label}</button></div>`;
       return;
     }
-    if (c.mini==='frase') this.renderFrase(); else if (c.mini==='crono') this.renderCrono(); else if (c.mini==='ruleta') this.renderRuleta();
+    if (c.mini==='tabu') this.renderTabu(); else if (c.mini==='cuanto') this.renderCuanto(); else if (c.mini==='frase') this.renderFrase(); else if (c.mini==='crono') this.renderCrono(); else if (c.mini==='ruleta') this.renderRuleta();
+  }
+  // Cartas de reacción: cuenta atrás y la acción aparece en grande para todos a la vez
+  reaction(){
+    const c=this.game.current; const el=$('bomb');
+    let n=3;
+    const show=t=>{ el.innerHTML=t; el.classList.add('active'); };
+    el.style.animation='none';
+    show(`<div style="font-size:9rem;font-weight:800">${n}</div>`);
+    const tick=setInterval(()=>{
+      n--;
+      if (n>0) return show(`<div style="font-size:9rem;font-weight:800">${n}</div>`);
+      clearInterval(tick);
+      el.style.animation='';
+      try{ navigator.vibrate && navigator.vibrate(300); }catch(e){}
+      show(`<h1 style="font-size:2.4rem;padding:0 16px">${esc(c.title)}</h1><p style="font-size:1.4rem;font-weight:700;padding:0 20px">${esc(c.text)}</p><p class="small" style="opacity:.8;margin-top:20px">Toca para cerrar</p>`);
+      c.revealed=true; this.save();
+    },800);
   }
   // Lengua de signos: frase privada
+  nextFrom(list, key){
+    const g=this.game; g[key]=g[key]||[];
+    let free=list.map((x,i)=>i).filter(i=>!g[key].includes(i));
+    if (!free.length){ g[key]=[]; free=list.map((x,i)=>i); }
+    const i=rnd(free); g[key].push(i); this.save(); return list[i];
+  }
+  renderTabu(){
+    const m=this.mini, c=this.game.current, [w,ban]=m.item;
+    $('c-mini').innerHTML = `<div class="mini" style="text-align:center">${m.open
+      ? `<div style="font-size:1.8rem;font-weight:800;color:var(--amber)">${esc(w)}</div><div class="small">Prohibido decir: <b style="color:#fca5a5">${ban.map(esc).join(' · ')}</b></div><button class="btn" onclick="app.mini.open=false;app.renderTabu()">🙈 Ocultar</button>`
+      : `<button class="btn btn-purple" onclick="app.mini.open=true;app.renderTabu()">👁️ Ver palabra (solo ${esc(c.j1)})</button>`}</div>`;
+  }
+  renderCuanto(){
+    const m=this.mini, [q,a]=m.item;
+    $('c-mini').innerHTML = `<div class="mini" style="text-align:center"><div style="font-size:1.25rem;font-weight:800">${esc(q)}</div>${m.open
+      ? `<div class="small muted">Respuesta</div><div style="font-size:2rem;font-weight:800;color:var(--amber)">${esc(a)}</div>`
+      : `<button class="btn btn-primary" onclick="app.mini.open=true;app.renderCuanto()">Todos han dicho su cifra: ver respuesta</button>`}</div>`;
+  }
+  whoAmI(){
+    const name=this.nextFrom(WHO_AM_I,'usedWho'); const el=$('bomb');
+    let left=60;
+    el.style.animation='none'; el.style.background='#4f46e5';
+    const draw=()=>{ el.innerHTML = `<div style="font-size:1rem;opacity:.85">${esc(this.game.current.j1)}, ¡no mires!</div>
+      <h1 style="font-size:3rem;padding:0 12px">${esc(name)}</h1>
+      <div style="font-size:2.4rem;font-weight:800">${left}s</div>
+      <p class="small" style="opacity:.85">Solo se responde «sí» o «no». Toca la pantalla cuando lo adivine.</p>`; };
+    draw(); el.classList.add('active');
+    clearInterval(this._whoTimer);
+    this._whoTimer=setInterval(()=>{ left--; if (left<=0){ clearInterval(this._whoTimer); el.innerHTML=`<h1 style="font-size:2.4rem">⌛ ¡TIEMPO!</h1><p style="font-size:1.3rem">Era <b>${esc(name)}</b>.<br>${esc(this.game.current.j1)} bebe 3.</p><p class="small" style="opacity:.8">Toca para cerrar</p>`; try{navigator.vibrate&&navigator.vibrate([300,100,300]);}catch(e){} return; } draw(); },1000);
+  }
   nextPhrase(){
     const g=this.game; g.usedPhrases = g.usedPhrases||[];
     let free = PHRASES.filter(f=>!g.usedPhrases.includes(f));
