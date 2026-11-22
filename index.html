@@ -302,6 +302,9 @@ h1,h2,h3{font-weight:800;letter-spacing:-.02em}
     <p class="tiny muted" style="margin-top:6px">Se aplica en la siguiente partida.</p>
     <div class="setting-title">Contenido</div>
     <label class="check"><input type="checkbox" id="set-hot" onchange="app.setHot(this.checked)"> 🔥 Cartas +18 / humor negro (<span id="hot-count">0</span>)</label>
+    <div class="setting-title">Mazo</div>
+    <button class="btn btn-block" onclick="app.resetDeck()">🔄 Reiniciar mazo (<span id="deck-left"></span>)</button>
+    <p class="tiny muted" style="margin-top:6px">Las cartas no se repiten aunque empecéis partida nueva, hasta que salgan todas. Pulsa aquí para que puedan volver a salir todas desde ya.</p>
     <div class="setting-title">Categorías activas</div>
     <div class="grid2" id="set-cats"></div>
 
@@ -365,7 +368,7 @@ const CATEGORIES = {
   MINIJUEGO:      { name: 'MINIJUEGO',       icon: '🎮', color: '#4f46e5', weight: 16 },
   VOTACION:       { name: 'VOTACIÓN',        icon: '🗳️', color: '#7c3aed', weight: 16 },
   VIRUS:          { name: 'VIRUS',           icon: '☣️', color: '#dc2626', weight: 14 },
-  CASTIGO_MAXIMO: { name: 'CASTIGO MÁXIMO',  icon: '💥', color: '#991b1b', weight: 6 }
+  CASTIGO_MAXIMO: { name: 'CASTIGO MÁXIMO',  icon: '💥', color: '#991b1b', weight: 3, minGap: 15 }   // minGap: mínimo de cartas entre dos de esta categoría
 };
 
 /* =====================================================================
@@ -729,6 +732,8 @@ class App {
     if (this.game && !(await ui.confirm('Hay una partida a medias. ¿Empezar una nueva y perderla?', 'Nueva partida'))) return;
     this.settings.players = this.settings.players.map(p=>p.trim());
     this.game = newGameState(this.settings.players);
+    const known = new Set(this.pool().map(c=>c.id));
+    this.game.played = (this.settings.history||[]).filter(id=>known.has(id));   // no repetir cartas de partidas anteriores
     if (this.settings.mystery) {
       this.assignRoles(); this.assignMissions();
       this.save();
@@ -837,6 +842,8 @@ class App {
     g.lastCat = cat;
     this.timer.left = card.time || 0;
     if (!g.played.includes(card.id)) g.played.push(card.id);
+    g.lastIdx = g.lastIdx || {}; g.lastIdx[cat] = g.round;
+    this.settings.history = [...g.played];          // recuerda las cartas salidas entre partidas
     g.stats.cats[cat] = (g.stats.cats[cat]||0)+1;
 
     if (card.rule) {
@@ -886,6 +893,9 @@ class App {
     }
     let use = fresh.length ? fresh : cats;
     if (use.length > 1 && g.lastCat) use = use.filter(k=>k!==g.lastCat);
+    // separación mínima (p. ej. castigo máximo: como mucho uno cada 15 cartas)
+    const spaced = use.filter(k => !CATEGORIES[k]?.minGap || !g.lastIdx || g.lastIdx[k]==null || g.round - g.lastIdx[k] >= CATEGORIES[k].minGap);
+    if (spaced.length) use = spaced;
     const total = use.reduce((s,k)=>s+(CATEGORIES[k]?.weight||10),0);
     let r = Math.random()*total;
     for (const k of use){ r -= (CATEGORIES[k]?.weight||10); if (r<=0) return k; }
@@ -1363,6 +1373,8 @@ class App {
   /* ---------- Ajustes ---------- */
   renderSettings(){
     $('set-mystery').checked = this.settings.mystery;
+    { const known=new Set(this.pool().map(c=>c.id)); const used=(this.game?this.game.played:(this.settings.history||[])).filter(id=>known.has(id)).length;
+      $('deck-left').textContent = `quedan ${known.size-used} de ${known.size} sin salir`; }
     $('set-online').checked = this.settings.online !== false;
     $('set-online').parentElement.style.display = NET.available() ? '' : 'none';
     $('set-hot').checked = this.settings.hot;
@@ -1381,6 +1393,11 @@ class App {
       <button class="btn btn-danger btn-sm" onclick="app.delCustom(${i})">✕</button></div>`).join('') : '<p class="muted small">Aún no has creado ninguna.</p>';
   }
   setMystery(v){ this.settings.mystery=v; this.save(); }
+  async resetDeck(){
+    if (!(await ui.confirm('¿Reiniciar el mazo? Todas las cartas podrán volver a salir.','Reiniciar'))) return;
+    this.settings.history=[]; if (this.game) this.game.played = this.game.current ? [this.game.current.id] : [];
+    this.save(); this.renderSettings();
+  }
   setOnline(v){ this.settings.online=v; this.save(); }
   setMissions(n){ this.settings.missionsPerPlayer=n; this.save(); this.renderSettings(); }
   setHot(v){ this.settings.hot=v; this.save(); this.renderSettings(); }
